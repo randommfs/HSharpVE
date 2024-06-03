@@ -36,8 +36,8 @@ namespace HSharpVE {
         // 250 more values 
     };
 
-    std::string to_string(EExceptionSource source);
-    std::string to_string(EExceptionReason reason);
+    std::string toString(EExceptionSource source);
+    std::string toString(EExceptionReason reason);
 
     [[noreturn]] void error(EExceptionSource source, EExceptionReason reason, std::string_view message);
 }

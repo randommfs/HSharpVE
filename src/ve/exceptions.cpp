@@ -6,7 +6,7 @@
 
 using namespace HSharpVE;
 
-std::string HSharpVE::to_string(EExceptionSource source) {
+std::string HSharpVE::toString(EExceptionSource source) {
     switch (source) {
         HSHARP_ENUM_CASE(HSharpVE::EExceptionSource, PARSER);
         HSHARP_ENUM_CASE(HSharpVE::EExceptionSource, UTILITY);
@@ -16,7 +16,7 @@ std::string HSharpVE::to_string(EExceptionSource source) {
     }
 }
 
-std::string HSharpVE::to_string(EExceptionReason reason) {
+std::string HSharpVE::toString(EExceptionReason reason) {
     switch (reason) {
         HSHARP_ENUM_CASE(HSharpVE::EExceptionReason, EARLY_EOF);
         HSHARP_ENUM_CASE(HSharpVE::EExceptionReason, CAST_ERROR);
@@ -29,8 +29,8 @@ std::string HSharpVE::to_string(EExceptionReason reason) {
 }
 
 [[noreturn]] void HSharpVE::error(EExceptionSource source, EExceptionReason reason, std::string_view message) {
-    std::cerr << RED << '[' << to_string(source) << ']'
-              << ' ' << to_string(reason) << ": " << message 
+    std::cerr << RED << '[' << toString(source) << ']'
+              << ' ' << toString(reason) << ": " << message 
               << RESET;
     std::abort();
 }
