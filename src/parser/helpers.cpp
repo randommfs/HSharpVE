@@ -38,10 +38,10 @@ HSharpParser::Token HSharpParser::Parser::try_consume(TokenType type, int mode) 
         return consume();
     else {
         std::string msg{};
-        HSharpVE::ExceptionType exc_type;
+        HSharpVE::EExceptionReason exc_type;
         if (!peek().has_value()){
             msg.append(std::format("Unexpected EOF"));
-            exc_type = HSharpVE::EndOfFile;
+            exc_type = HSharpVE::EExceptionReason::EARLY_EOF;
         }
         else{
             msg.append(std::format( "Unexpected token type: {}, expected {}\n\tLine {}: {}\n",
@@ -49,11 +49,9 @@ HSharpParser::Token HSharpParser::Parser::try_consume(TokenType type, int mode) 
                                     HSharpParser::ToString(type),
                                     peek().value().line,
                                     lines[peek().value().line - 1].c_str()));
-            exc_type = HSharpVE::UnexpectedToken;
+            exc_type = HSharpVE::EExceptionReason::UNEXPECTED_TOKEN;
         }
-        throwFatalException(HSharpVE::ExceptionSource::Parser,
-                            exc_type,
-                            msg);
+        error(HSharpVE::EExceptionSource::PARSER, exc_type, msg);
         exit(1);
     }
 }
