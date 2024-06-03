@@ -72,9 +72,10 @@ def build(args: argparse.Namespace) -> None:
         print('build directory not found.')
         sys.exit(1)
 
-    cores = int(getattr(args, 'cores', None))
+    cores = getattr(args, 'cores', None)
     if not cores:
         cores = multiprocessing.cpu_count()
+    cores = int(cores)
     print(f'running build with {cores} threads')
     
     for config in configs:
