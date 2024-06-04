@@ -96,9 +96,7 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
         } else if (std::isspace(peek().value())) {
             skip();
         } else {
-            throwFatalException(HSharpVE::ExceptionSource::Tokenizer,
-                                HSharpVE::ExceptionType::SyntaxError,
-                                "Detected invalid syntax: invalid token");
+            error(HSharpVE::EExceptionSource::TOKENIZER, HSharpVE::EExceptionReason::UNEXPECTED_TOKEN, "invalid token");
         }
     }
 

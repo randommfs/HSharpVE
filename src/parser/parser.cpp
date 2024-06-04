@@ -8,19 +8,19 @@ static constexpr char parser_fail_msg[] = "Parser failed to parse expression.\n"
 
 std::optional<HSharpParser::NodeBinExpr *> HSharpParser::Parser::parse_bin_expr() {
     std::string msg{};
-    HSharpVE::ExceptionType exc_type;
+    HSharpVE::EExceptionReason exc_type;
     std::optional<NodeExpression*> lhs;
     NodeBinExpr* bin_expr;
     if (!(lhs = parse_expression())) {
         msg.append(parser_fail_msg);
-        exc_type = HSharpVE::ExpressionParseError;
+        exc_type = HSharpVE::EExceptionReason::UNEXPECTED_TOKEN;
         goto error;
     }
 
     bin_expr = allocator.alloc<NodeBinExpr>();
     if (!peek().has_value()){
         msg.append(parser_fail_msg);
-        exc_type = HSharpVE::EndOfFile;
+        exc_type = HSharpVE::EExceptionReason::EARLY_EOF;
         goto error;
     }
     switch (peek()->ttype){
@@ -58,12 +58,12 @@ std::optional<HSharpParser::NodeBinExpr *> HSharpParser::Parser::parse_bin_expr(
         }
         default:
             msg.append(parser_fail_msg);
-            exc_type = HSharpVE::ExpressionParseError;
+            exc_type = HSharpVE::EExceptionReason::UNEXPECTED_TOKEN;
             goto error;
     }
 
     error:
-    throwFatalException(HSharpVE::Tokenizer, exc_type, msg);
+    error(HSharpVE::EExceptionSource::TOKENIZER, exc_type, msg);
 }
 
 std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
@@ -133,9 +133,7 @@ std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expres
     std::string msg{};
     msg.append("Parser failed to parse expression.\n");
     msg.append(std::format("Last token: {}", ToString(tokens[index].ttype)));
-    throwFatalException(HSharpVE::ExceptionSource::Parser,
-                        HSharpVE::ExceptionType::ExpressionParseError,
-                        msg);
+    error(HSharpVE::EExceptionSource::PARSER, HSharpVE::EExceptionReason::UNEXPECTED_TOKEN, msg);
 }
 
 std::optional<HSharpParser::NodeStmt *> HSharpParser::Parser::parse_statement() {
@@ -219,9 +217,7 @@ std::optional<HSharpParser::NodeStmt *> HSharpParser::Parser::parse_statement() 
     }
 
     error:
-    throwFatalException(HSharpVE::Parser,
-                        HSharpVE::ExpressionParseError,
-                        parser_fail_msg);
+    error(HSharpVE::EExceptionSource::PARSER, HSharpVE::EExceptionReason::SYNTAX_ERROR, parser_fail_msg);
 }
 
 
@@ -230,9 +226,7 @@ std::optional<HSharpParser::NodeProgram> HSharpParser::Parser::parse_program() {
     while (peek().has_value()) {
         std::optional<NodeStmt*> stmt = parse_statement();
         if (!stmt.has_value())
-            throwFatalException(HSharpVE::Parser,
-                                HSharpVE::ExceptionType::StatementParseError,
-                                "Parser failed to parse statement");
+            error(HSharpVE::EExceptionSource::PARSER, HSharpVE::EExceptionReason::SYNTAX_ERROR, "Parser failed to parse statement");
 
         program.statements.push_back(stmt.value());
     }
