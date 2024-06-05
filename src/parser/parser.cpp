@@ -1,5 +1,6 @@
 #include <optional>
 #include <iostream>
+#include <functional>
 
 #include <parser/parser.hpp>
 #include <ve/exceptions.hpp>
@@ -95,26 +96,43 @@ std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
 
 std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expression() {
     if (auto term = parse_term()) {
-        if (try_consume(TokenType::TOK_PLUS)) {
+        auto lambda = [=]<typename T>() -> NodeExpression * {
             auto bin_expr = allocator.alloc<NodeBinExpr>();
-            auto bin_expr_add = allocator.alloc<NodeBinExprAdd>();
+            auto bin_expr_add = allocator.alloc<T>();
             auto lhs_expr = allocator.alloc<NodeExpression>();
-            std::optional<NodeExpression*> rhs;
+            std::optional<NodeExpression *> rhs;
             lhs_expr->expr = term.value();
             bin_expr_add->lhs = lhs_expr;
+            skip();
 
-            if (!(rhs = parse_expression())) goto error;
+            if (!(rhs = parse_expression())) {
+                std::string msg{};
+                msg.append("Parser failed to parse expression.\n");
+                msg.append(std::format("Last token: {}", ToString(tokens[index].ttype)));
+                error(HSharpVE::EExceptionSource::PARSER, HSharpVE::EExceptionReason::UNEXPECTED_TOKEN, msg);
+            }
 
             auto expr = allocator.alloc<NodeExpression>();
             bin_expr_add->rhs = rhs.value();
             bin_expr->var = bin_expr_add;
             expr->expr = bin_expr;
             return expr;
-        } else {
-            auto expr = allocator.alloc<NodeExpression>();
-            expr->expr = term.value();
-            expr->line = term.value()->line;
-            return expr;
+        };
+        TokenType t = peek()->ttype;
+        switch (t) {
+            case TOK_PLUS:
+                return lambda.operator()<NodeBinExprAdd>();
+            case TOK_MINUS:
+                return lambda.operator()<NodeBinExprSub>();
+            case TOK_MUL_SIGN:
+                return lambda.operator()<NodeBinExprMul>();
+            case TOK_FSLASH:
+                return lambda.operator()<NodeBinExprDiv>();
+            default:
+                auto expr = allocator.alloc<NodeExpression>();
+                expr->expr = term.value();
+                expr->line = term.value()->line;
+                return expr;
         }
     } else if (auto str_lit = try_consume(TokenType::TOK_STR_LIT)) {
         auto expr_str_lit = allocator.alloc<NodeExpressionStrLit>();
@@ -128,12 +146,7 @@ std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expres
         expr->expr = bin_expr.value();
         return expr;
     }
-
-    error:
-    std::string msg{};
-    msg.append("Parser failed to parse expression.\n");
-    msg.append(std::format("Last token: {}", ToString(tokens[index].ttype)));
-    error(HSharpVE::EExceptionSource::PARSER, HSharpVE::EExceptionReason::UNEXPECTED_TOKEN, msg);
+    return {};
 }
 
 std::optional<HSharpParser::NodeStmt *> HSharpParser::Parser::parse_statement() {
