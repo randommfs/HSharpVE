@@ -29,6 +29,7 @@ namespace HSharpVE {
     enum class EExceptionReason : std::int_fast8_t {
         SYNTAX_ERROR,       // Holder for generic parser error
         TYPE_ERROR,         // Variable type is not appropriate in current context
+        PARSE_ERROR,        // Unknown error, can be thrown in parser
         NOT_IMPLEMENTED,    // Holder for early parser versions and testing features
         CAST_ERROR,         // Errors from casting mechanisms
         EARLY_EOF,          // Expecting more tokens in input
