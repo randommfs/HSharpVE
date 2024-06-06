@@ -1,0 +1,3 @@
+[submodule "include/hpool"]
+	path = include/hpool
+	url = https://github.com/randommfs/HPool.git

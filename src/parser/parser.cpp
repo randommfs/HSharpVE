@@ -94,7 +94,50 @@ std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
 }
 
 
-std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expression() {
+std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expression(int min_prec) {
+    std::optional<NodeTerm*> term_lhs = parse_term();
+    if (!term_lhs.has_value())
+        return {};
+
+    while (true){
+        std::optional<Token> cur_tok = peek();
+        NodeBinExpr* expr;
+        Token op;
+        auto prec_lambda = [=]<typename T>() mutable -> void {
+            expr = allocator.alloc<NodeBinExpr>();
+            expr->var = allocator.alloc<T>();
+        };
+        if (!cur_tok.has_value()) break;
+
+        auto prec = bin_precedence(cur_tok->ttype);
+
+        if (!prec.has_value() || prec < min_prec) break;
+
+        int next_min_prec = prec.value() + 1;
+        op = consume();
+        expr = allocator.alloc<NodeBinExpr>();
+        switch(op.ttype){
+            case TOK_PLUS:{
+                auto node = allocator.alloc<NodeBinExprAdd>();
+                node->lhs = term_lhs.value();
+                expr->var = allocator.alloc<NodeBinExprAdd>();
+                break;
+            }
+            case TOK_MINUS:
+                expr->var = allocator.alloc<NodeBinExprSub>();
+                break;
+            case TOK_MUL_SIGN:
+                expr->var = allocator.alloc<NodeBinExprMul>();
+                break;
+            case TOK_FSLASH:
+                expr->var = allocator.alloc<NodeBinExprDiv>();
+                break;
+            default:
+                break;
+
+        }
+    }
+
     if (auto term = parse_term()) {
         auto lambda = [=]<typename T>() -> NodeExpression * {
             auto bin_expr = allocator.alloc<NodeBinExpr>();

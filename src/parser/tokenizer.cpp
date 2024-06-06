@@ -8,6 +8,31 @@
 using std::uint32_t;
 using HSharpParser::Token;
 
+bool HSharpParser::is_bin_operator(HSharpParser::TokenType ttype) {
+    switch(ttype){
+        case TOK_PLUS:
+        case TOK_MINUS:
+        case TOK_MUL_SIGN:
+        case TOK_FSLASH:
+            return true;
+        default:
+            return false;
+    }
+}
+
+std::optional<int> HSharpParser::bin_precedence(HSharpParser::TokenType ttype){
+    switch(ttype){
+        case TOK_PLUS:
+        case TOK_MINUS:
+            return 0;
+        case TOK_MUL_SIGN:
+        case TOK_FSLASH:
+            return 1;
+        default:
+            return {};
+    }
+}
+
 std::vector<Token> HSharpParser::Tokenizer::tokenize() {
     std::string buf = {};
     std::vector<Token> tokens = {};

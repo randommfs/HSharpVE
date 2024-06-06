@@ -11,6 +11,9 @@
 #include <parser/tokens.hpp>
 
 namespace HSharpParser {
+    bool is_bin_operator(TokenType ttype);
+    std::optional<int> bin_precedence(TokenType ttype);
+
     class Tokenizer {
     private:
         File &file;
@@ -41,7 +44,7 @@ namespace HSharpParser {
         void skip(int count = 1);
 
         std::optional<NodeStmt*> parse_statement();
-        std::optional<NodeExpression*> parse_expression();
+        std::optional<NodeExpression*> parse_expression(int min_prec = 0);
         std::optional<NodeBinExpr*> parse_bin_expr();
         std::optional<NodeTerm*> parse_term();
 
