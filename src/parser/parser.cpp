@@ -2,6 +2,8 @@
 #include <iostream>
 #include <functional>
 
+#include <cassert>
+
 #include <parser/parser.hpp>
 #include <ve/exceptions.hpp>
 
@@ -97,65 +99,54 @@ std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
 
 std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expression(int min_prec) {
     if (auto term_lhs = parse_term()){
-        NodeExpression* expr_lhs = allocator.alloc<NodeExpression>();
-        expr_lhs->expr = term_lhs.value();
+        auto expr_lhs = allocator.emplace<NodeExpression>(term_lhs.value());
 
         while (true){
+            std::optional<NodeExpression*> expr_rhs;
+            NodeExpression* expr_lhs2;
+            NodeBinExpr* expr;
             std::optional<Token> cur_tok = peek();
             std::optional<int> prec;
-            NodeBinExpr* expr;
-            NodeExpression* expr_lhs2 = allocator.alloc<NodeExpression>();
-            Token op;
+
             if (!cur_tok.has_value()) break;
-
             prec = bin_precedence(cur_tok->ttype);
-
             if (!prec.has_value() || prec < min_prec) break;
 
-            op = consume();
+            Token token = consume();
             int next_min_prec = prec.value() + 1;
-            expr = allocator.alloc<NodeBinExpr>();
-            auto expr_rhs = parse_expression(next_min_prec);
+            expr_rhs = parse_expression(next_min_prec);
             if (!expr_rhs.has_value())
                 HSharpVE::error(HSharpVE::EExceptionSource::PARSER,
                                 HSharpVE::EExceptionReason::PARSE_ERROR,
                                 "Failed to parse expression");
 
-            expr_lhs2->expr = expr_lhs->expr;
-            switch(op.ttype){
+            expr = allocator.emplace<NodeBinExpr>();
+            expr_lhs2 = allocator.emplace<NodeExpression>();
+            switch(token.ttype){
                 case TOK_PLUS:{
-                    auto node = allocator.alloc<NodeBinExprAdd>();
-                    node->lhs = expr_lhs2;
-                    node->rhs = expr_rhs.value();
-                    expr->var = node;
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprAdd>(expr_lhs2, expr_rhs.value());
                     break;
                 }
                 case TOK_MINUS:{
-                    auto node = allocator.alloc<NodeBinExprSub>();
-                    node->lhs = expr_lhs2;
-                    node->rhs = expr_rhs.value();
-                    expr->var = node;
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprSub>(expr_lhs2, expr_rhs.value());
                     break;
                 }
                 case TOK_MUL_SIGN:{
-                    auto node = allocator.alloc<NodeBinExprMul>();
-                    node->lhs = expr_lhs2;
-                    node->rhs = expr_rhs.value();
-                    expr->var = node;
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprMul>(expr_lhs2, expr_rhs.value());
                     break;
                 }
                 case TOK_FSLASH:{
-                    auto node = allocator.alloc<NodeBinExprMul>();
-                    node->lhs = expr_lhs2;
-                    node->rhs = expr_rhs.value();
-                    expr->var = node;
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprDiv>(expr_lhs2, expr_rhs.value());
                     break;
                 }
                 default:
-                    break;
+                    assert(false);
             }
             expr_lhs->expr = expr;
-            return expr_lhs;
         }
         return expr_lhs;
     } else if (auto str_lit = try_consume(TokenType::TOK_STR_LIT)) {
