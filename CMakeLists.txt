@@ -17,9 +17,12 @@ set(RELEASE_COMPILE_FLAGS "-Wall -O2 -fdata-sections -ffunction-sections -Wl --g
 add_subdirectory(src)
 
 add_executable(hve-ng ${MAIN_SRC})
+add_executable(tests ${TESTS_SRC})
 
 target_include_directories(hve-ng PUBLIC ${INCLUDE_DIR})
+target_include_directories(tests PUBLIC ${INCLUDE_DIR})
 target_link_libraries(hve-ng PRIVATE parser ve)
+target_link_libraries(tests PRIVATE parser ve gtest gtest_main)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS ${DEBUG_COMPILE_FLAGS})

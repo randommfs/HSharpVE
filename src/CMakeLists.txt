@@ -8,6 +8,8 @@ set(MAIN_SRC
     src/main/arguments_handler.cpp
 PARENT_SCOPE)
 
+set(TESTS_SRC test/tests_tokenizer.cpp PARENT_SCOPE)
+
 set(PARSER_SRC parser/helpers.cpp)
 list(APPEND PARSER_SRC parser/parser.cpp)
 list(APPEND PARSER_SRC parser/tokenizer.cpp)

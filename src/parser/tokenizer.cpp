@@ -85,21 +85,6 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
         } else if (peek().value() == '=') {
             tokens.push_back({.line = line, .ttype = TokenType::TOK_EQUALITY_SIGN});
             skip();
-        } else if (peek().value() == '+') {
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_PLUS});
-            skip();
-        } else if (peek().value() == '-') {
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_MINUS});
-            skip();
-        } else if (peek().value() == '/') {
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_FSLASH});
-            skip();
-        } else if (peek().value() == '*') {
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_MUL_SIGN});
-            skip();
-        } else if (peek().value() == '.'){
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_DOT});
-            skip();
         } else if (peek().value() == '/' && peek(1).has_value() && peek(1).value() == '/') {
             skip(2);
             while (peek().has_value() && peek().value() != '\n')
@@ -115,6 +100,21 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
                 skip();
             if (peek().has_value())
                 skip();
+        } else if (peek().value() == '+') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_PLUS});
+            skip();
+        } else if (peek().value() == '-') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_MINUS});
+            skip();
+        } else if (peek().value() == '/') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_FSLASH});
+            skip();
+        } else if (peek().value() == '*') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_MUL_SIGN});
+            skip();
+        } else if (peek().value() == '.') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_DOT});
+            skip();
         } else if (peek().value() == '\n'){
             ++line;
             skip();
