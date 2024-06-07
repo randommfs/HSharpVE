@@ -2,7 +2,7 @@
 #include <string>
 #include <cstring>
 
-#include "ve/exceptions.hpp"
+#include <ve/exceptions.hpp>
 #include <parser/parser.hpp>
 #include <ve/ve.hpp>
 
@@ -35,7 +35,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HS
 }
 
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(const HSharpParser::NodeExpressionStrLit *expr) const {
-    auto str = static_cast<std::string*>(parent->strings_pool.malloc());
+    auto str = static_cast<std::string*>(parent->strings_pool.allocate());
     str = new(str)std::string(expr->str_lit.value.value());
     return ValueInfo{
             .type = VariableType::STRING,
@@ -64,7 +64,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HS
         std::cerr << "Expression is not valid integer!" << std::endl;
         exit(1);
     }
-    auto num = parent->integers_pool.malloc();
+    auto num = parent->integers_pool.allocate();
     *num = std::stol(term->int_lit.value.value());
     return {.type = VariableType::INT,
             .value = num,
@@ -72,7 +72,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HS
             .dealloc_required = true};
 }
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprAdd *expr) const {
-    auto result = parent->integers_pool.malloc();
+    auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
@@ -84,7 +84,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprSub *expr) const {
-    auto result = parent->integers_pool.malloc();
+    auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
@@ -96,7 +96,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprMul *expr) const {
-    auto result = parent->integers_pool.malloc();
+    auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
@@ -108,7 +108,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprDiv *expr) const {
-    auto result = parent->integers_pool.malloc();
+    auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
@@ -136,9 +136,9 @@ void HSharpVE::VirtualEnvironment::delete_var_value(HSharpVE::Variable &variable
 void* HSharpVE::VirtualEnvironment::allocate(HSharp::VariableType vtype) {
     switch(vtype){
         case VariableType::INT:
-            return integers_pool.malloc();
+            return integers_pool.allocate();
         case VariableType::STRING:
-            return strings_pool.malloc();
+            return strings_pool.allocate();
         default:
             error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot delete value: invalid type");
     }
@@ -150,7 +150,7 @@ void HSharpVE::VirtualEnvironment::delete_variables() {
     for (auto pair : global_scope.variables) {
         switch (pair.second.vtype) {
             case VariableType::INT: integers_pool.free(static_cast<int64_t*>(pair.second.value)); break;
-            case VariableType::STRING: strings_pool.free(pair.second.value); break;
+            case VariableType::STRING: strings_pool.free(static_cast<std::string*>(pair.second.value)); break;
             default:
                 std::printf("Cannot dispose variable %s: unknown type, freeing impossible", pair.first.c_str());
         }
@@ -167,7 +167,7 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     if (!data.dealloc_required) return;
     switch (data.type) {
         case VariableType::INT: integers_pool.free(static_cast<int64_t*>(data.value)); break;
-        case VariableType::STRING: strings_pool.free(data.value); break;
+        case VariableType::STRING: strings_pool.free(static_cast<std::string*>(data.value)); break;
         default: std::terminate();
     }
 }

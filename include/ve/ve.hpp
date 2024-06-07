@@ -3,12 +3,11 @@
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>
-#include <boost/pool/pool.hpp>
-#include <boost/pool/object_pool.hpp>
 
 #include <visitors.hpp>
 #include <parser/parser.hpp>
 #include <ve/exceptions.hpp>
+#include <hpool/cpp/hpool.hpp>
 
 /* Nodes */
 using HSharpParser::NodeStmtInput;
@@ -74,8 +73,8 @@ namespace HSharpVE {
         HSharpParser::NodeProgram root;
         std::vector<std::string>& lines;
         Scope global_scope;
-        boost::object_pool<std::int64_t> integers_pool;
-        boost::pool<> strings_pool;
+        hpool::HPool<std::int64_t> integers_pool;
+        hpool::HPool<std::string> strings_pool;
         ExpressionVisitor exprvisitor{this};
         StatementVisitor stmtvisitor{this};
         TermVisitor termvisitor{this};
@@ -107,9 +106,9 @@ namespace HSharpVE {
             : root(std::move(root)),
               lines(lines),
               integers_pool(16),
-              strings_pool(sizeof(std::string)),
-              verbose(verbose){
-        }
+              strings_pool(16),
+              verbose(verbose){}
+
         ~VirtualEnvironment() {
             delete_variables();
         }

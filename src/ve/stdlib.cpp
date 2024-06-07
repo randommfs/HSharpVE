@@ -4,6 +4,7 @@
 #include <ve/exceptions.hpp>
 #include <parser/parser.hpp>
 #include <ve/ve.hpp>
+#include <hpool/cpp/hpool.hpp>
 
 using HSharp::ValueInfo;
 
@@ -83,7 +84,7 @@ void HSharpVE::VirtualEnvironment::StatementVisitor_StatementVarAssign(HSharpPar
 
 
 ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor_ExprStrLit(NodeExpressionStrLit* expr) {
-    auto str = static_cast<std::string*>(strings_pool.malloc());
+    auto str = static_cast<std::string*>(strings_pool.allocate());
     *str = std::string(expr->str_lit.value.value());
     return {VariableType::STRING, str};
 }
@@ -93,7 +94,7 @@ ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor_ExprIntLit(HSharpParse
         std::cerr << "Expression is not valid integer!" << std::endl;
         exit(1);
     } else {
-        auto value = static_cast<int64_t*>(integers_pool.malloc());
+        auto value = static_cast<int64_t*>(integers_pool.allocate());
         *value = std::stol(expr->int_lit.value.value());
         return {VariableType::INT, value};
     }
