@@ -6,11 +6,11 @@
 #include <variant>
 
 #include <parser/nodes.hpp>
-#include <main/file.hpp>
 #include <arena_alloc/arena.hpp>
 #include <parser/tokens.hpp>
 
 namespace HSharpParser {
+<<<<<<< HEAD
     bool is_bin_operator(TokenType ttype);
     std::optional<int> bin_precedence(TokenType ttype);
 
@@ -29,6 +29,9 @@ namespace HSharpParser {
 
         std::vector<Token> tokenize();
     };
+=======
+    
+>>>>>>> 802fbaa (tokenizer)
 
     class Parser {
     protected:
@@ -38,8 +41,8 @@ namespace HSharpParser {
         ArenaAllocator allocator;
 
         [[nodiscard]] std::optional<Token> peek(int offset = 0) const;
-        Token try_consume(TokenType type, int mode);
-        std::optional<Token> try_consume(TokenType type);
+        Token try_consume(EToken type, int mode);
+        std::optional<Token> try_consume(EToken type);
         Token consume();
         void skip(int count = 1);
 
