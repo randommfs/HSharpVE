@@ -31,7 +31,7 @@ namespace HSharpParser {
     };
 
     class Parser {
-    private:
+    protected:
         const std::vector<Token>& tokens;
         const std::vector<std::string>& lines;
         std::size_t index = 0;
