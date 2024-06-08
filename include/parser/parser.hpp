@@ -10,28 +10,9 @@
 #include <parser/tokens.hpp>
 
 namespace HSharpParser {
-<<<<<<< HEAD
-    bool is_bin_operator(TokenType ttype);
-    std::optional<int> bin_precedence(TokenType ttype);
 
-    class Tokenizer {
-    private:
-        File &file;
-        std::uint32_t index = 0;
-
-        [[nodiscard]] std::optional<char> peek(int offset = 0) const;
-
-        char consume();
-        void skip(int count = 1);
-
-    public:
-        explicit Tokenizer(File &file) : file(file){}
-
-        std::vector<Token> tokenize();
-    };
-=======
-    
->>>>>>> 802fbaa (tokenizer)
+    bool is_bin_operator(EToken ttype);
+    std::optional<int> bin_precedence(EToken ttype);
 
     class Parser {
     protected:

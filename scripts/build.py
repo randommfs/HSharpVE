@@ -25,8 +25,8 @@ Usage
 
 
 def configure(args: argparse.Namespace) -> None:
-    requires = ['cmake']
-    print('running configure. checking requirements: ' + ', '.join(requires))
+    requires = ['cmake', 'conan']
+    print('[buildsystem] running configure. checking requirements: ' + ', '.join(requires))
     for utility in requires:
         utility_check(utility)
 
@@ -42,12 +42,22 @@ def configure(args: argparse.Namespace) -> None:
         shutil.rmtree(directory)
         os.mkdir(directory)
 
-    print('configuring for CMake build configs: ' + ', '.join(configs))
+    print('[configure] configuring for CMake build configs: ' + ', '.join(configs))
 
     cmake_args = []
-    print('running cmake with args: ' + ', '.join(cmake_args))
+    print('[configure] running cmake with args: ' + ', '.join(cmake_args))
     for config in configs:
-        print(f'running configure command for config {config}...')
+        print(f'[configure] installing conan deps...')
+        subprocess.run([
+                'conan',
+                'install',
+                os.curdir,
+                f'--output-folder={directory}/{config}',
+                '--build=missing',
+            ], encoding='UTF-8', stderr=subprocess.STDOUT
+        )
+
+        print(f'[configure] running configure command for config {config}...')
         subprocess.run([
                 'cmake', 
                 f'-B{directory}/{config}', 
@@ -60,13 +70,13 @@ def configure(args: argparse.Namespace) -> None:
 
 def build(args: argparse.Namespace) -> None:
     requires = ['cmake', 'gcc']
-    print('running build. checking requirements: ' + ', '.join(requires))
+    print('[buildsystem] running build. checking requirements: ' + ', '.join(requires))
     for utility in requires:
         utility_check(utility)
     
     directory, configs = get_common(args)
 
-    print(f'using directory: {directory}')
+    print(f'[build] using directory: {directory}')
 
     if not os.path.exists(directory):
         print('build directory not found.')
@@ -76,10 +86,10 @@ def build(args: argparse.Namespace) -> None:
     if not cores:
         cores = multiprocessing.cpu_count()
     cores = int(cores)
-    print(f'running build with {cores} threads')
+    print(f'[build] running build with {cores} threads')
     
     for config in configs:
-        print(f'running build command for config {config}...')
+        print(f'[build] running build command for config {config}...')
         subprocess.run([
                 'cmake', 
                 '--build', 

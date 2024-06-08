@@ -1,10 +1,8 @@
 #include <cctype>
-#include <cstdint>
-#include <cstring>
 #include <format>
-#include <utility>
-#include <vector>
 #include <string>
+#include <vector>
+#include <utility>
 
 #include <parser/tokens.hpp>
 #include <parser/tokenizer.hpp>
@@ -13,25 +11,18 @@
 using namespace HSharpParser;
 
 
-void Tokenizer::checkStreamFlags(std::fstream& ifs) {
-    if (!ifs.binary || !ifs.in || !ifs) {
-        fallback("ICE");
-    }
-}
-
-std::vector<Token> Tokenizer::tokenize(std::fstream& file) {
-    checkStreamFlags(file);
-
+std::vector<Token> Tokenizer::tokenize(std::istream& is) {
     state_.num = 0;
     state_.line.clear();
     std::vector<Token> tokens;
 
-    while (getline(file, state_.line)) {
+    while (getline(is, state_.line)) {
         auto position = state_.line.begin();
         while (position != state_.line.end()) {
             EBet guess = bet(position, state_.line.end());
             Token token = read(position, state_.line.end(), guess);
             // post-processing?
+            // probably work for parser
             ++state_.num;
         }
     }
@@ -40,7 +31,7 @@ std::vector<Token> Tokenizer::tokenize(std::fstream& file) {
 }
 
 Tokenizer::EBet Tokenizer::bet(std::string::iterator position, std::string::iterator end) {
-    char first = peekChar(position, end);
+    char first = peek(position, end);
     if (std::isalpha(first)) {
         return EBet::IDENTIFIER;
     }
@@ -61,6 +52,11 @@ Token Tokenizer::read(std::string::iterator& position, std::string::iterator end
 
 Token Tokenizer::readIdentifier(std::string::iterator& position, std::string::iterator end) {
     std::string identifier;
+
+    if (char head = peek(position, end); isIdentifierChar(head, true)) {
+        identifier.push_back(head);
+    }
+
     while (position != end && isIdentifierChar(*position)) {
         identifier.push_back(*(position++));
     }
@@ -72,7 +68,7 @@ Token Tokenizer::readIdentifier(std::string::iterator& position, std::string::it
     return makeToken(EToken::IDENTIFIER, identifier);
 }
 
-char Tokenizer::peekChar(std::string::iterator position, std::string::iterator end) {
+char Tokenizer::peek(std::string::iterator position, std::string::iterator end) {
     if (position != end) {
         return *position;
     }
@@ -83,7 +79,7 @@ Token Tokenizer::readLiteral(std::string::iterator& position, std::string::itera
     std::string literal;
     EToken type;
 
-    if (peekChar(position, end) == '\"') {
+    if (peek(position, end) == '\"') {
         // read string
         type = EToken::STRING_LITERAL;
         while (position != end && *position != '\"') {
@@ -105,18 +101,6 @@ Token Tokenizer::readLiteral(std::string::iterator& position, std::string::itera
 }
 
 Token Tokenizer::readSpecial(std::string::iterator& position, std::string::iterator end) {
-    static std::map<char, EToken> typings = {
-        std::make_pair(';', EToken::STATEMENT_TERMINATOR),
-        std::make_pair('+', EToken::ADDITION_SIGN),
-        std::make_pair('-', EToken::SUBTRACTION_SIGN),
-        std::make_pair('*', EToken::STAR_SIGN),
-        std::make_pair('=', EToken::ASSIGNMENT_SIGN),
-        std::make_pair('(', EToken::PARENTHESIS_OPEN_SIGN),
-        std::make_pair(')', EToken::PARENTHESIS_CLOSE_SIGN),
-        std::make_pair('{', EToken::CONTEXT_OPEN_SIGN),
-        std::make_pair('}', EToken::CONTEXT_CLOSE_SIGN)
-    };
-
     if (position != end) {
         auto type = typings.find(*position);
         if (type == typings.end()) {
@@ -179,25 +163,23 @@ std::string Tokenizer::formatError(LineSpecialization lineSpec, ErrorSpecializat
     return formatted;
 }
 
-std::fstream& Tokenizer::getline(std::fstream& ifs, std::string& line) {
-    std::getline(ifs, line);
+std::istream& Tokenizer::getline(std::istream& is, std::string& line) {
+    std::getline(is, line);
 
-    again:
-    if (!ifs) {
-        fallback("error reading line", LineSpecialization(state_.line, state_.num, 0));
-    }
+    while (is && line.back() == '\\') {
+        std::string unformatted;
+        if (!std::getline(is, unformatted)) {
+            fallback("error reading line", LineSpecialization(state_.line, state_.num, 0));
+        }
 
-    if (strip(line); !line.empty() && line.back() == '\\') {
-        std::string temp;
-        std::getline(ifs, temp);
+        strip(unformatted);
         line.pop_back();
-        line.append(temp);
-        goto again;
+        line.append(unformatted);
     }
 
-    return ifs;
+    return is;
 }
 
-bool Tokenizer::isIdentifierChar(char ch) {
-    return std::isalpha(ch); // might add smth else here
+bool Tokenizer::isIdentifierChar(char ch, bool /* isFirst */) {
+    return std::isalpha(ch); // might add something else here
 }

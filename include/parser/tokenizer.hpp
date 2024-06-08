@@ -2,7 +2,7 @@
 
 #include <map>
 #include <cstdint>
-#include <fstream>
+#include <istream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -17,9 +17,21 @@ namespace HSharpParser {
     class Tokenizer {
     public:
         Tokenizer();
-        std::vector<Token> tokenize(std::fstream& file);
+        std::vector<Token> tokenize(std::istream& is);
 
     private:
+
+        inline const static std::map<char, EToken> typings = {
+            std::make_pair(';', EToken::STATEMENT_TERMINATOR),
+            std::make_pair('+', EToken::ADDITION_SIGN),
+            std::make_pair('-', EToken::SUBTRACTION_SIGN),
+            std::make_pair('*', EToken::STAR_SIGN),
+            std::make_pair('=', EToken::ASSIGNMENT_SIGN),
+            std::make_pair('(', EToken::PARENTHESIS_OPEN_SIGN),
+            std::make_pair(')', EToken::PARENTHESIS_CLOSE_SIGN),
+            std::make_pair('{', EToken::CONTEXT_OPEN_SIGN),
+            std::make_pair('}', EToken::CONTEXT_CLOSE_SIGN)
+        };
 
         struct LineSpecialization {
             std::string line;
@@ -38,24 +50,23 @@ namespace HSharpParser {
             SPECIAL
         };
 
-        void checkStreamFlags(std::fstream& ifs);
         [[noreturn]] void fallback(std::string error, std::optional<LineSpecialization> lineSpec = std::nullopt);
 
         // formatting
         std::string formatError(LineSpecialization lineSpec, ErrorSpecialization errorSpec);
-        std::fstream& getline(std::fstream& ifs, std::string& line);
+        std::istream& getline(std::istream& ifs, std::string& line);
         void strip(std::string& line, bool stripBothSides = false);
 
         // reading
         EBet bet(std::string::iterator position, std::string::iterator end);
-        char peekChar(std::string::iterator position, std::string::iterator end);
+        char peek(std::string::iterator position, std::string::iterator end);
         Token read(std::string::iterator& position, std::string::iterator end, EBet bet);
         Token readIdentifier(std::string::iterator& position, std::string::iterator end);
         Token readLiteral(std::string::iterator& position, std::string::iterator end);
         Token readSpecial(std::string::iterator& position, std::string::iterator end);
 
         // char checks
-        bool isIdentifierChar(char ch);
+        bool isIdentifierChar(char ch, bool isFirst = false);
 
     private:
         
