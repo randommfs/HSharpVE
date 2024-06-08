@@ -301,6 +301,33 @@ TEST(PARSER, VARIABLE_ASSIGN_VALUE_BIN_EXPR_MUL_INT){
     EXPECT_THAT(visitors_activated, ::testing::ElementsAreArray(expected));
 }
 
+TEST(PARSER, VARIABLE_ASSIGN_VALUE_BIN_EXPR_SUB_BIN_EXPR_MUL_INT){
+    File file("num = 50 * (25 * 2);");
+    vector<NodeType> visitors_activated{};
+    vector<string> lines{};
+    Visitor svisitor{visitors_activated};
+    NodeType expected[] = {
+            NodeType::VAR_ASSIGN,NodeType::BIN_EXPR,
+            NodeType::MUL,NodeType::TERM,
+            NodeType::INT_LIT,NodeType::TERM,
+            NodeType::INT_LIT
+    };
+
+    lines.push_back(file.contents.value());
+    Tokenizer tokenizer(file);
+    auto tokens = tokenizer.tokenize();
+    Parser parser(tokens, lines);
+    auto nodes = parser.parse_program();
+    for (uint32_t i = 0; i < nodes->statements.size(); ++i)
+        std::visit(svisitor, nodes->statements[i]->statement);
+
+    ASSERT_TRUE(nodes.has_value());
+    EXPECT_EQ(nodes.value().statements.size(), 1);
+    EXPECT_EQ(nodes.value().statements[0]->line, 0);
+    EXPECT_EQ(visitors_activated.size(), sizeof(expected) / sizeof(NodeType));
+    EXPECT_THAT(visitors_activated, ::testing::ElementsAreArray(expected));
+}
+
 TEST(PARSER, VARIABLE_ASSIGN_VALUE_BIN_EXPR_DIV_INT){
     File file("num = 50 / 50;");
     vector<NodeType> visitors_activated{};

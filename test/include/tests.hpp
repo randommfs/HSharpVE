@@ -9,6 +9,7 @@ enum class NodeType{
     VAR_ASSIGN,
     TERM,
     STR_LIT,
+    PAREN,
     BIN_EXPR,
     INT_LIT,
     IDENT,
@@ -48,6 +49,10 @@ struct Visitor{
     }
     void operator()(const HSharpParser::NodeExpressionStrLit* expr) {
         visitors_executed.push_back(NodeType::STR_LIT);
+    }
+    void operator()(const HSharpParser::NodeTermParen* term){
+        visitors_executed.push_back(NodeType::PAREN);
+        std::visit(*this, term->expr->expr);
     }
     void operator()(HSharpParser::NodeBinExpr* expr) {
         visitors_executed.push_back(NodeType::BIN_EXPR);

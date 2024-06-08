@@ -11,6 +11,7 @@ namespace HSharpParser{
     /* Forward declarations to allow any order of regular declarations */
     struct NodeExpression;
     struct NodeExpressionIdent;
+    struct NodeTermParen;
     struct NodeBinExpr;
     struct NodeBinExprAdd;
     struct NodeBinExprSub;
@@ -49,7 +50,7 @@ namespace HSharpParser{
     };
 
     struct NodeTerm {
-        std::variant<NodeTermIntLit*, NodeTermIdent*> term;
+        std::variant<NodeTermIntLit*, NodeTermIdent*, NodeTermParen*> term;
         uint32_t line;
     };
 
@@ -57,6 +58,10 @@ namespace HSharpParser{
     struct NodeExpression {
         std::variant<NodeTerm*, NodeExpressionStrLit*, NodeBinExpr*> expr;
         uint32_t line;
+    };
+
+    struct NodeTermParen{
+        NodeExpression* expr;
     };
 
     /* Binary expressions */

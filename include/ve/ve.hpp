@@ -59,6 +59,7 @@ namespace HSharpVE {
             explicit TermVisitor(VirtualEnvironment* parent) : parent(parent) {}
             ValueInfo operator()(const HSharpParser::NodeTermIntLit* term) const;
             ValueInfo operator()(const HSharpParser::NodeTermIdent* term) const;
+            ValueInfo operator()(const HSharpParser::NodeTermParen* term) const;
         };
         struct BinExprVisitor {
         private:

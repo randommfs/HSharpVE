@@ -71,6 +71,9 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HS
             .line = term->line,
             .dealloc_required = true};
 }
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HSharpParser::NodeTermParen *term) const {
+    return std::visit(parent->exprvisitor, term->expr->expr);
+}
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprAdd *expr) const {
     auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;

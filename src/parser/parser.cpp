@@ -71,8 +71,7 @@ std::optional<HSharpParser::NodeBinExpr *> HSharpParser::Parser::parse_bin_expr(
 }
 
 std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
-    TokenType type = peek()->ttype;
-    switch (type){
+    switch (peek()->ttype){
         case TOK_INT_LIT:{
             std::optional<Token> int_lit = consume();
             auto term_int_lit = allocator.alloc<NodeTermIntLit>();
@@ -90,6 +89,18 @@ std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
             expr->term = term_ident;
             expr->line = ident.value().line;
             return expr;
+        }
+        case TOK_PAREN_OPEN:{
+            skip();
+            std::optional<NodeExpression*> expr = parse_expression();
+            if (!expr.has_value())
+                HSharpVE::error(HSharpVE::EExceptionSource::PARSER,
+                                HSharpVE::EExceptionReason::PARSE_ERROR,
+                                "Failed to parse expression!");
+            try_consume(TokenType::TOK_PAREN_CLOSE, 1);
+            auto term_paren = allocator.emplace<NodeTermParen>(expr.value());
+            auto term = allocator.emplace<NodeTerm>(term_paren);
+            return term;
         }
         default:
             return {};
