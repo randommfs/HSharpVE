@@ -173,9 +173,8 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
 }
 void HSharpVE::VirtualEnvironment::run() {
     global_scope = {};
-    for (const HSharpParser::NodeStmt* stmt : root.statements) {
+    for (const HSharpParser::NodeStmt* stmt : root.statements)
         exec_statement(stmt);
-    }
 }
 
 bool HSharpVE::VirtualEnvironment::is_number(const std::string& s) {

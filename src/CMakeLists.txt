@@ -11,6 +11,7 @@ PARENT_SCOPE)
 set(TESTS_SRC
     test/tests_tokenizer.cpp
     test/tests_parser.cpp
+    test/tests_ve.cpp
     PARENT_SCOPE)
 
 set(PARSER_SRC parser/helpers.cpp)
