@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <format>
+
 #include <cstring>
 
 #include <ve/exceptions.hpp>
@@ -15,19 +17,85 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtPrint *stmt) const {
-    parent->StatementVisitor_StatementPrint(stmt);
+    ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+    std::string result;
+    switch (pair.type){
+        case VariableType::INT:
+            result = std::to_string(*static_cast<int64_t*>(pair.value));
+            break;
+        case VariableType::STRING:
+            result = *static_cast<std::string*>(pair.value);
+            break;
+        default:
+            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "print(): conversion failed: unknown type");
+    }
+    std::puts(result.c_str());
+    parent->dispose_value(pair);
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtExit *stmt) const {
-    parent->StatementVisitor_StatementExit(stmt);
+    int64_t exitcode;
+    ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+    switch(pair.type){
+        case VariableType::INT:
+            exitcode = *static_cast<int64_t*>(pair.value);
+            break;
+        case VariableType::STRING:{
+            std::string* ptr = static_cast<std::string*>(pair.value);
+            if (!is_number(*ptr)){
+                std::string msg{};
+                msg.append("exit(): conversion failed: string is not convertable to number\n");
+                msg.append(std::format("\tLine {}: {}", stmt->line, parent->lines.at(stmt->line - 1)));
+                error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, msg);
+            }
+            exitcode = std::stol(*ptr);
+            break;
+        }
+        default:
+            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "exit(): conversion failed: unknown type");
+    }
+    parent->dispose_value(pair);
+    parent->delete_variables();
+    exit(exitcode);
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVar *stmt) const {
-    parent->StatementVisitor_StatementVar(stmt);
+    if (variables.exists(stmt->ident.value.value())) {
+        std::cerr << "Variable reinitialization is not allowed\n";
+        exit(1);
+    } else {
+        const ValueInfo pair = std::visit(exprvisitor, stmt->expr->expr);
+        variables[stmt->ident.value.value(), depth] = {.vtype = pair.type, .value = pair.value};
+    }
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVarAssign *stmt) const {
-    parent->StatementVisitor_StatementVarAssign(stmt);
+    if (!is_variable(const_cast<char*>(stmt->ident.value.value().c_str())))
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value to immediate value");
+    auto variable = &variables[stmt->ident.value.value().c_str(), depth];
+    ValueInfo info = std::visit(exprvisitor, stmt->expr->expr);
+    delete_var_value(*variable);
+    variable->vtype = info.type;
+    variable->value = allocate(info.type);
+    switch(info.type){
+        case VariableType::INT:
+            memcpy(variable->value, info.value, sizeof(int64_t));
+            break;
+        case VariableType::STRING:
+            variable->value = new(variable->value)std::string(*static_cast<std::string*>(info.value));
+            break;
+        default:
+            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value: invalid type");
+    }
+    dispose_value(info);
+}
+
+void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
+
+}
+
+void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtIf *stmt) const {
+
 }
 
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HSharpParser::NodeTerm *term) const {
@@ -53,8 +121,8 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HS
         exit(1);
     }
     return {
-            .type = parent->global_scope.variables.at(term->ident.value.value()).vtype,
-            .value = parent->global_scope.variables.at(term->ident.value.value()).value,
+            .type = parent->variables.at(term->ident.value.value()).value()->vtype,
+            .value = parent->variables.at(term->ident.value.value()).value()->value,
             .line = term->line,
             .dealloc_required = false
     };
@@ -150,21 +218,10 @@ void HSharpVE::VirtualEnvironment::exec_statement(const HSharpParser::NodeStmt* 
     std::visit(stmtvisitor, stmt->statement);
 }
 void HSharpVE::VirtualEnvironment::delete_variables() {
-    for (auto pair : global_scope.variables) {
-        switch (pair.second.vtype) {
-            case VariableType::INT: integers_pool.free(static_cast<int64_t*>(pair.second.value)); break;
-            case VariableType::STRING: strings_pool.free(static_cast<std::string*>(pair.second.value)); break;
-            default:
-                std::printf("Cannot dispose variable %s: unknown type, freeing impossible", pair.first.c_str());
-        }
-    }
-    global_scope.variables.clear();
+    variables.clean(integers_pool, strings_pool);
 }
 bool HSharpVE::VirtualEnvironment::is_variable(char* name) {
-    auto it = std::find_if(std::begin(global_scope.variables), std::end(global_scope.variables), [name](auto&& arg) {
-        return !strcmp(arg.first.c_str(), name);
-    });
-    return it != std::end(global_scope.variables);
+    return variables.exists(name);
 }
 void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     if (!data.dealloc_required) return;
@@ -175,7 +232,7 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     }
 }
 void HSharpVE::VirtualEnvironment::run() {
-    global_scope = {};
+    variables = {};
     for (const HSharpParser::NodeStmt* stmt : root.statements)
         exec_statement(stmt);
 }
@@ -184,10 +241,4 @@ bool HSharpVE::VirtualEnvironment::is_number(const std::string& s) {
     std::string::const_iterator it = s.begin();
     while (it != s.end() && std::isdigit(*it)) ++it;
     return !s.empty() && it == s.end();
-}
-
-template<typename... Args>
-std::string HSharpVE::VirtualEnvironment::vformat_wrapper(const char* format, Args&&... args)
-{
-    return std::vformat(format, std::make_format_args(args...));
 }

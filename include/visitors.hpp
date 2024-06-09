@@ -21,6 +21,8 @@ namespace HSharp{
         virtual void operator()(HSharpParser::NodeStmtExit* stmt) const = 0;
         virtual void operator()(HSharpParser::NodeStmtVar* stmt) const = 0;
         virtual void operator()(HSharpParser::NodeStmtVarAssign* stmt) const = 0;
+        virtual void operator()(HSharpParser::NodeScope* stmt) const = 0;
+        virtual void operator()(HSharpParser::NodeStmtIf* stmt) const = 0;
         virtual ~IStatementVisitor() = default;
     };
 

@@ -22,9 +22,12 @@ namespace HSharpParser{
     struct NodeStmtInput;
     struct NodeStmtPrint;
     struct NodeStmtVar;
+    struct NodeScope;
+    struct NodeStmtIf;
     struct NodeTerm;
     struct NodeTermIdent;
     struct NodeTermIntLit;
+    struct NodeIfPred;
     struct NodeProgram;
 
     /* Base nodes declarations */
@@ -105,8 +108,30 @@ namespace HSharpParser{
                 NodeStmtPrint*,
                 NodeStmtInput*,
                 NodeStmtVar*,
-                NodeStmtVarAssign*> statement;
+                NodeStmtVarAssign*,
+                NodeScope*,
+                NodeStmtIf*> statement;
         uint32_t line;
+    };
+
+    struct NodeScope{
+        std::vector<NodeStmt*> statements;
+    };
+    struct NodePredIfElif{
+        NodeExpression* expr;
+        NodeScope* scope;
+        std::optional<NodeIfPred*> pred;
+    };
+    struct NodeIfPredElse{
+        NodeScope* scope;
+    };
+    struct NodeIfPred{
+        std::variant<NodePredIfElif*, NodeIfPredElse*> var;
+    };
+    struct NodeStmtIf{
+        NodeExpression* expr;
+        NodeScope* scope;
+        std::optional<NodeIfPred*> pred;
     };
 
     /* Start of AST */

@@ -1,11 +1,8 @@
 #include <variant>
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <parser/parser.hpp>
-#include <parser/nodes.hpp>
 #include <ve/ve.hpp>
-#include <tests.hpp>
 
 using HSharpParser::Tokenizer;
 using HSharpParser::Parser;
@@ -49,6 +46,7 @@ TEST(VE, EXIT_STR){
     Parser parser(tokens, lines);
     auto nodes = parser.parse_program();
     VirtualEnvironment virtualenv{nodes.value(), lines, true};
+    virtualenv.run();
     EXPECT_EXIT(virtualenv.run(), ::testing::ExitedWithCode(50), "");
 }
 

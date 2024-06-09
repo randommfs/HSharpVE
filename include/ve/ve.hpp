@@ -1,8 +1,11 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <unordered_map>
+#include <stack>
+
+#include <cassert>
+
 
 #include <visitors.hpp>
 #include <parser/parser.hpp>
@@ -15,6 +18,8 @@ using HSharpParser::NodeStmtExit;
 using HSharpParser::NodeStmtPrint;
 using HSharpParser::NodeStmtVar;
 using HSharpParser::NodeStmtVarAssign;
+using HSharpParser::NodeScope;
+using HSharpParser::NodeStmtIf;
 using HSharpParser::NodeExpressionStrLit;
 using HSharp::VariableType;
 using HSharp::ValueInfo;
@@ -24,10 +29,9 @@ namespace HSharpVE {
         VariableType vtype;
         void* value;
     };
-    struct Scope {
-        std::unordered_map<std::string, Variable> variables;
-    };
 
+    typedef std::unordered_map<std::string, Variable> Scope;
+    typedef std::vector<Scope> FunctionScope;
 
     class VirtualEnvironment{
     private:
@@ -41,6 +45,8 @@ namespace HSharpVE {
             void operator()(NodeStmtExit* stmt) const override;
             void operator()(NodeStmtVar* stmt) const override;
             void operator()(NodeStmtVarAssign* stmt) const override;
+            void operator()(NodeScope* stmt) const override;
+            void operator()(NodeStmtIf* stmt) const override;
         };
 
         struct ExpressionVisitor : HSharp::IExpressionVisitor {
@@ -74,6 +80,7 @@ namespace HSharpVE {
         HSharpParser::NodeProgram root;
         std::vector<std::string>& lines;
         Scope global_scope;
+        std::stack<FunctionScope> function_scopes;
         hpool::HPool<std::int64_t> integers_pool;
         hpool::HPool<std::string> strings_pool;
         ExpressionVisitor exprvisitor{this};
@@ -81,31 +88,29 @@ namespace HSharpVE {
         TermVisitor termvisitor{this};
         BinExprVisitor binexprvisitor{this};
         bool verbose;
-
-        void StatementVisitor_StatementPrint(HSharpParser::NodeStmtPrint* stmt);
-        void StatementVisitor_StatementExit(HSharpParser::NodeStmtExit* stmt);
-        void StatementVisitor_StatementVar(HSharpParser::NodeStmtVar* stmt);
-        void StatementVisitor_StatementVarAssign(HSharpParser::NodeStmtVarAssign* stmt);
-        ValueInfo ExpressionVisitor_ExprStrLit(NodeExpressionStrLit* expr);
-        ValueInfo ExpressionVisitor_ExprIntLit(HSharpParser::NodeTermIntLit* expr);
-        ValueInfo ExpressionVisitor_ExprIdent(HSharpParser::NodeTermIdent* expr) const;
-        ValueInfo ExpressionVisitor_BinExpr(HSharpParser::NodeBinExpr* expr) const;
+        bool is_current_scope_global;
 
         void exec_statement(const HSharpParser::NodeStmt* stmt);
 
+        Variable& create_variable(std::string& name, VariableType vtype);
+        bool variable_exists(std::string& name);
+        void set_variable(std::string& name, void* value);
+        Variable& get_variable(std::string& name);
+        void create_scope();
+        void destroy_scope();
         void delete_variables();
         bool is_variable(char* name);
         void dispose_value(ValueInfo& data);
         void delete_var_value(Variable& variable);
         void* allocate(VariableType vtype);
 
-        template <typename... Args>
-        std::string vformat_wrapper(const char* format, Args&&... args);
         static bool is_number(const std::string& s);
     public:
         explicit VirtualEnvironment(HSharpParser::NodeProgram root, std::vector<std::string>& lines, const bool verbose)
             : root(std::move(root)),
               lines(lines),
+              global_scope{},
+              function_scopes{},
               integers_pool(16),
               strings_pool(16),
               verbose(verbose){}

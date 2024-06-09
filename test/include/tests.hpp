@@ -7,6 +7,8 @@ enum class NodeType{
     EXIT,
     VAR,
     VAR_ASSIGN,
+    SCOPE,
+    IF,
     TERM,
     STR_LIT,
     PAREN,
@@ -42,6 +44,15 @@ struct Visitor{
     void operator()(HSharpParser::NodeStmtVarAssign* stmt) {
         visitors_executed.push_back(NodeType::VAR_ASSIGN);
         std::visit(*this, stmt->expr->expr);
+    }
+    void operator()(HSharpParser::NodeScope* stmt){
+        visitors_executed.push_back(NodeType::SCOPE);
+        for (auto statement : stmt->statements)
+            std::visit(*this, statement->statement);
+    }
+    void operator()(HSharpParser::NodeStmtIf* stmt){
+        visitors_executed.push_back(NodeType::IF);
+
     }
     void operator()(HSharpParser::NodeTerm* term) {
         visitors_executed.push_back(NodeType::TERM);

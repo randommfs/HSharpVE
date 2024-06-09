@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <boost/preprocessor.hpp>
 
 #define X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE(r, data, elem)    \
@@ -44,7 +46,9 @@ namespace HSharpParser{
 (TOK_CURLY_CLOSE)\
 (TOK_DOT)\
 (TOK_IDENT)\
-(TOK_IF));
+(TOK_IF)\
+(TOK_OR)\
+(TOK_ELSE));
 
     struct Token {
         uint32_t line;

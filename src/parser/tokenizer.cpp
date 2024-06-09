@@ -46,20 +46,23 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
 
             if (buf == "exit") {
                 tokens.push_back({.line = line, .ttype = TokenType::TOK_EXIT});
-                buf.clear();
             } else if (buf == "var") {
                 tokens.push_back({.line = line, .ttype = TokenType::TOK_VAR});
-                buf.clear();
             } else if (buf == "print") {
                 tokens.push_back({.line = line, .ttype = TokenType::TOK_PRINT});
-                buf.clear();
             } else if (buf == "input") {
                 tokens.push_back({.line = line, .ttype = TokenType::TOK_INPUT});
-                buf.clear();
-            } else {
-                tokens.push_back({.line = line, .ttype = TokenType::TOK_IDENT, .value = buf});
-                buf.clear();
+            } else if (buf == "if"){
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_IF});
+            } else if (buf == "or"){
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_OR});
+            } else if (buf == "else"){
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_ELSE});
             }
+            else {
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_IDENT, .value = buf});
+            }
+            buf.clear();
         } else if (peek().value() == '"') {
             skip();
             while (peek().has_value() && peek().value() != '"')
@@ -100,6 +103,12 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
                 skip();
             if (peek().has_value())
                 skip();
+        } else if (peek().value() == '{'){
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_CURLY_OPEN});
+            skip();
+        } else if (peek().value() == '}'){
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_CURLY_CLOSE});
+            skip();
         } else if (peek().value() == '+') {
             tokens.push_back({.line = line, .ttype = TokenType::TOK_PLUS});
             skip();

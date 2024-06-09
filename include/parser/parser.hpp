@@ -45,6 +45,8 @@ namespace HSharpParser {
 
         std::optional<NodeStmt*> parse_statement();
         std::optional<NodeExpression*> parse_expression(int min_prec = 0);
+        std::optional<NodeScope*> parse_scope();
+        std::optional<NodeIfPred*> parse_if_pred();
         std::optional<NodeBinExpr*> parse_bin_expr();
         std::optional<NodeTerm*> parse_term();
 
