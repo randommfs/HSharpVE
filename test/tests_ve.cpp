@@ -46,7 +46,6 @@ TEST(VE, EXIT_STR){
     Parser parser(tokens, lines);
     auto nodes = parser.parse_program();
     VirtualEnvironment virtualenv{nodes.value(), lines, true};
-    virtualenv.run();
     EXPECT_EXIT(virtualenv.run(), ::testing::ExitedWithCode(50), "");
 }
 

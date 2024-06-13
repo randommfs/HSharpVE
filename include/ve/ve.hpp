@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <unordered_map>
 #include <stack>
 
@@ -55,7 +54,7 @@ namespace HSharpVE {
         public:
             explicit ExpressionVisitor(VirtualEnvironment* parent) : parent(parent) {}
             ValueInfo operator()(HSharpParser::NodeTerm* term) const override;
-            ValueInfo operator()(const HSharpParser::NodeExpressionStrLit* expr) const override;
+            ValueInfo operator()(HSharpParser::NodeExpressionStrLit* expr) const override;
             ValueInfo operator()(HSharpParser::NodeBinExpr* expr) const override;
         };
         struct TermVisitor {
@@ -63,24 +62,26 @@ namespace HSharpVE {
             VirtualEnvironment* parent;
         public:
             explicit TermVisitor(VirtualEnvironment* parent) : parent(parent) {}
-            ValueInfo operator()(const HSharpParser::NodeTermIntLit* term) const;
-            ValueInfo operator()(const HSharpParser::NodeTermIdent* term) const;
-            ValueInfo operator()(const HSharpParser::NodeTermParen* term) const;
+            ValueInfo operator()(HSharpParser::NodeTermIntLit* term) const;
+            ValueInfo operator()(HSharpParser::NodeTermIdent* term) const;
+            ValueInfo operator()(HSharpParser::NodeTermParen* term) const;
         };
         struct BinExprVisitor {
         private:
             VirtualEnvironment* parent;
         public:
             explicit BinExprVisitor(VirtualEnvironment* parent) : parent(parent){}
-            ValueInfo operator()(const HSharpParser::NodeBinExprAdd* expr) const;
-            ValueInfo operator()(const HSharpParser::NodeBinExprSub* expr) const;
-            ValueInfo operator()(const HSharpParser::NodeBinExprMul* expr) const;
-            ValueInfo operator()(const HSharpParser::NodeBinExprDiv* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprAdd* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprSub* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprMul* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprDiv* expr) const;
         };
+        
         HSharpParser::NodeProgram root;
         std::vector<std::string>& lines;
         Scope global_scope;
         std::stack<FunctionScope> function_scopes;
+        FunctionScope* fscopes_top;
         hpool::HPool<std::int64_t> integers_pool;
         hpool::HPool<std::string> strings_pool;
         ExpressionVisitor exprvisitor{this};
@@ -113,7 +114,8 @@ namespace HSharpVE {
               function_scopes{},
               integers_pool(16),
               strings_pool(16),
-              verbose(verbose){}
+              verbose(verbose),
+              is_current_scope_global(true){}
 
         ~VirtualEnvironment() {
             delete_variables();

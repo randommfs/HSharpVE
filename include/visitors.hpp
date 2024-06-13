@@ -29,24 +29,24 @@ namespace HSharp{
     class IExpressionVisitor {
     public:
         virtual ValueInfo operator()(HSharpParser::NodeTerm* term) const = 0;
-        virtual ValueInfo operator()(const HSharpParser::NodeExpressionStrLit* expr) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeExpressionStrLit* expr) const = 0;
         virtual ValueInfo operator()(HSharpParser::NodeBinExpr* expr) const = 0;
         virtual ~IExpressionVisitor() = default;
     };
 
     class ITermVisitor {
     public:
-        virtual ValueInfo operator()(const HSharpParser::NodeTermIntLit* term) const = 0;
-        virtual ValueInfo operator()(const HSharpParser::NodeTermIdent* term) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeTermIntLit* term) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeTermIdent* term) const = 0;
         virtual ~ITermVisitor() = default;
     };
 
     class IBinExprVisitor {
     public:
-        virtual ValueInfo operator()(const HSharpParser::NodeBinExprAdd* expr) const = 0;
-        virtual ValueInfo operator()(const HSharpParser::NodeBinExprSub* expr) const = 0;
-        virtual ValueInfo operator()(const HSharpParser::NodeBinExprMul* expr) const = 0;
-        virtual ValueInfo operator()(const HSharpParser::NodeBinExprDiv* expr) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeBinExprAdd* expr) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeBinExprSub* expr) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeBinExprMul* expr) const = 0;
+        virtual ValueInfo operator()(HSharpParser::NodeBinExprDiv* expr) const = 0;
         virtual ~IBinExprVisitor() = default;
     };
 }

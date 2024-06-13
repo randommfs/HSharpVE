@@ -1,4 +1,7 @@
+#include <visitors.hpp>
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <format>
 
@@ -60,34 +63,35 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVar *stmt) const {
-    if (variables.exists(stmt->ident.value.value())) {
+    if (parent->variable_exists(stmt->ident.value.value())) {
         std::cerr << "Variable reinitialization is not allowed\n";
         exit(1);
     } else {
-        const ValueInfo pair = std::visit(exprvisitor, stmt->expr->expr);
-        variables[stmt->ident.value.value(), depth] = {.vtype = pair.type, .value = pair.value};
+        ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+        parent->dispose_value(pair);
+        parent->create_variable(stmt->ident.value.value(), pair.type).value = pair.value;
     }
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVarAssign *stmt) const {
-    if (!is_variable(const_cast<char*>(stmt->ident.value.value().c_str())))
+    if (!parent->variable_exists(stmt->ident.value.value()))
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value to immediate value");
-    auto variable = &variables[stmt->ident.value.value().c_str(), depth];
-    ValueInfo info = std::visit(exprvisitor, stmt->expr->expr);
-    delete_var_value(*variable);
-    variable->vtype = info.type;
-    variable->value = allocate(info.type);
+    Variable& variable = parent->get_variable(stmt->ident.value.value());
+    ValueInfo info = std::visit(parent->exprvisitor, stmt->expr->expr);
+    parent->delete_var_value(variable);
+    variable.vtype = info.type;
+    variable.value = parent->allocate(info.type);
     switch(info.type){
         case VariableType::INT:
-            memcpy(variable->value, info.value, sizeof(int64_t));
+            memcpy(variable.value, info.value, sizeof(int64_t));
             break;
         case VariableType::STRING:
-            variable->value = new(variable->value)std::string(*static_cast<std::string*>(info.value));
+            variable.value = new(variable.value)std::string(*static_cast<std::string*>(info.value));
             break;
         default:
             error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value: invalid type");
     }
-    dispose_value(info);
+    parent->dispose_value(info);
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
@@ -102,7 +106,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HS
     return std::visit(parent->termvisitor, term->term);
 }
 
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(const HSharpParser::NodeExpressionStrLit *expr) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HSharpParser::NodeExpressionStrLit *expr) const {
     auto str = static_cast<std::string*>(parent->strings_pool.allocate());
     str = new(str)std::string(expr->str_lit.value.value());
     return ValueInfo{
@@ -115,19 +119,19 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(co
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HSharpParser::NodeBinExpr *expr) const {
     return std::visit(parent->binexprvisitor, expr->var);
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HSharpParser::NodeTermIdent *term) const {
-    if (!parent->is_variable(const_cast<char*>(term->ident.value.value().c_str()))){
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpParser::NodeTermIdent *term) const {
+    if (!parent->variable_exists(term->ident.value.value())){
         std::cerr << "Invalid identifier" << std::endl;
         exit(1);
     }
     return {
-            .type = parent->variables.at(term->ident.value.value()).value()->vtype,
-            .value = parent->variables.at(term->ident.value.value()).value()->value,
+            .type = parent->get_variable(term->ident.value.value()).vtype,
+            .value = parent->get_variable(term->ident.value.value()).value,
             .line = term->line,
             .dealloc_required = false
     };
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HSharpParser::NodeTermIntLit *term) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpParser::NodeTermIntLit *term) const {
     if (!is_number(term->int_lit.value.value())) {
         std::cerr << "Expression is not valid integer!" << std::endl;
         exit(1);
@@ -139,10 +143,10 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HS
             .line = term->line,
             .dealloc_required = true};
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(const HSharpParser::NodeTermParen *term) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpParser::NodeTermParen *term) const {
     return std::visit(parent->exprvisitor, term->expr->expr);
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprAdd *expr) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprAdd *expr) const {
     auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
@@ -154,7 +158,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     parent->dispose_value(rhs);
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprSub *expr) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprSub *expr) const {
     auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
@@ -166,7 +170,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     parent->dispose_value(rhs);
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprMul *expr) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprMul *expr) const {
     auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
@@ -178,7 +182,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const
     parent->dispose_value(rhs);
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
-HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(const HSharpParser::NodeBinExprDiv *expr) const {
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprDiv *expr) const {
     auto result = parent->integers_pool.allocate();
     ValueInfo lhs, rhs;
     if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
@@ -218,21 +222,40 @@ void HSharpVE::VirtualEnvironment::exec_statement(const HSharpParser::NodeStmt* 
     std::visit(stmtvisitor, stmt->statement);
 }
 void HSharpVE::VirtualEnvironment::delete_variables() {
-    variables.clean(integers_pool, strings_pool);
-}
-bool HSharpVE::VirtualEnvironment::is_variable(char* name) {
-    return variables.exists(name);
+    for (auto var : global_scope)
+        if (var.second.vtype == HSharp::VariableType::STRING)
+            static_cast<std::string*>(var.second.value)->~string();
+    while (!function_scopes.empty()) {
+        FunctionScope& ptr = function_scopes.top();
+        function_scopes.pop();
+        for (auto scope : ptr) {
+            std::for_each(std::begin(scope), std::end(scope), [](std::pair<std::string, Variable> f){
+                if (f.second.vtype == HSharp::VariableType::STRING)
+                    static_cast<std::string*>(f.second.value)->~string();
+            });
+        }
+        ptr.clear();
+    }
+    global_scope.clear();
 }
 void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     if (!data.dealloc_required) return;
     switch (data.type) {
-        case VariableType::INT: integers_pool.free(static_cast<int64_t*>(data.value)); break;
-        case VariableType::STRING: strings_pool.free(static_cast<std::string*>(data.value)); break;
-        default: std::terminate();
+        case VariableType::INT:
+            integers_pool.free(static_cast<int64_t*>(data.value));
+            break;
+        case VariableType::STRING: 
+            strings_pool.free(static_cast<std::string*>(data.value));
+            break;
+        default:
+            error(EExceptionSource::VIRTUAL_ENV,
+                    EExceptionReason::DEALLOC_ERROR,
+                    "Failed to deallocate variable");
     }
 }
 void HSharpVE::VirtualEnvironment::run() {
-    variables = {};
+    global_scope = {};
+    function_scopes = {};
     for (const HSharpParser::NodeStmt* stmt : root.statements)
         exec_statement(stmt);
 }

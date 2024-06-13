@@ -2,10 +2,11 @@
 
 #include <vector>
 #include <variant>
+#include <optional>
 
 #include <cstdint>
 
-#include "tokens.hpp"
+#include <parser/tokens.hpp>
 
 namespace HSharpParser{
     /* Forward declarations to allow any order of regular declarations */

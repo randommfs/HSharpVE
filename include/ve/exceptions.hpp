@@ -33,7 +33,8 @@ namespace HSharpVE {
         NOT_IMPLEMENTED,    // Holder for early parser versions and testing features
         CAST_ERROR,         // Errors from casting mechanisms
         EARLY_EOF,          // Expecting more tokens in input
-        UNEXPECTED_TOKEN    // Expecting different token
+        UNEXPECTED_TOKEN,   // Expecting different token
+        DEALLOC_ERROR       // Unknown variable type
         // 250 more values 
     };
 
