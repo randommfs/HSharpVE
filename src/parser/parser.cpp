@@ -1,4 +1,3 @@
-#include "parser/tokens.hpp"
 #include <optional>
 #include <iostream>
 #include <functional>
@@ -256,7 +255,6 @@ std::optional<HSharpParser::NodeStmt *> HSharpParser::Parser::parse_statement() 
                             "Failed to parse expression");
 
         stmt_exit->expr = node_expr.value();
-        stmt_exit->line = node_expr.value()->line;
 
         try_consume(TokenType::TOK_PAREN_CLOSE, 1);
         try_consume(TokenType::TOK_SEMICOLON, 1);

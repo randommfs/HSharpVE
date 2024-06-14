@@ -1,19 +1,22 @@
+#include "ve/exceptions.hpp"
+#include <visitors.hpp>
 #include <ve/ve.hpp>
+
+#include <optional>
+
+#include <cstring>
 
 using HSharpVE::Variable;
 using HSharp::VariableType;
 using HSharpVE::VirtualEnvironment;
 
 Variable& VirtualEnvironment::create_variable(std::string &name, VariableType vtype) {
-    std::cout << global_scopes.size() << std::endl;
     if (is_current_scope_global){
         Variable& ref = global_scopes.back()[name];
         ref = {.vtype = vtype};
         return ref;
     }
     
-    std::cout << fscopes_top->size() << std::endl;
-    std::terminate();
     Variable& var = fscopes_top->back()[name];
     var = {.vtype = vtype};
     return var;
@@ -30,18 +33,40 @@ bool VirtualEnvironment::variable_exists(std::string &name) {
     return false;
 }
 
-void VirtualEnvironment::set_variable(std::string& name, void* value) {
-    get_variable(name).value = value;
+void VirtualEnvironment::set_variable(std::string& name, VariableType type, void* value) {
+    auto var = get_variable(name);
+    if (!var.has_value()){
+        error(EExceptionSource::VIRTUAL_ENV,
+            EExceptionReason::UNKNOWN_IDENT,
+            "Unknown identifier");
+    }
+    delete_var_value(*var.value());
+    var.value()->vtype = type;
+    var.value()->value = value;
+    int a = 5;
 }
 
-Variable& VirtualEnvironment::get_variable(std::string& name) {
+void VirtualEnvironment::set_variable(std::string& name, void* value) {
+    auto var = get_variable(name);
+    if (!var.has_value()){
+        error(EExceptionSource::VIRTUAL_ENV,
+            EExceptionReason::UNKNOWN_IDENT,
+            "Unknown identifier");
+    }
+    delete_var_value(*var.value());
+    var.value()->value = value;
+}
+
+std::optional<Variable*> VirtualEnvironment::get_variable(std::string& name) {
     for (auto scope : global_scopes) 
         if (scope.contains(name))
-            return scope[name];
+            return &scope.at(name);
 
     for (auto scope : *fscopes_top)
         if (scope.contains(name))
-            return scope[name];
+            return &scope.at(name); 
+
+    return {}; 
 }
 
 void VirtualEnvironment::create_scope() {

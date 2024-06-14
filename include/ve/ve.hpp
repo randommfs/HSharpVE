@@ -108,13 +108,14 @@ namespace HSharpVE {
         Variable& create_variable(std::string& name, VariableType vtype);
         bool variable_exists(std::string& name);
         void set_variable(std::string& name, void* value);
-        Variable& get_variable(std::string& name);
+        void set_variable(std::string& name, VariableType type, void* value);
+        std::optional<Variable*> get_variable(std::string& name);
         void create_scope();
         void destroy_scope();
         void delete_variables();
         bool is_variable(char* name);
         void dispose_value(ValueInfo& data);
-        void delete_var_value(Variable& variable);
+        void delete_var_value(const Variable& variable);
         void* allocate(VariableType vtype);
 
         static bool is_number(const std::string& s);

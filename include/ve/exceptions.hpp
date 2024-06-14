@@ -34,7 +34,8 @@ namespace HSharpVE {
         CAST_ERROR,         // Errors from casting mechanisms
         EARLY_EOF,          // Expecting more tokens in input
         UNEXPECTED_TOKEN,   // Expecting different token
-        DEALLOC_ERROR       // Unknown variable type
+        DEALLOC_ERROR,      // Unknown variable type
+        UNKNOWN_IDENT       // Unknown identifier
         // 250 more values 
     };
 

@@ -77,22 +77,22 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVarAssign *stmt) const {
     if (!parent->variable_exists(stmt->ident.value.value()))
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value to immediate value");
-    Variable& variable = parent->get_variable(stmt->ident.value.value());
+    auto variable = parent->get_variable(stmt->ident.value.value());
+    Variable temp;
     ValueInfo info = std::visit(parent->exprvisitor, stmt->expr->expr);
-    parent->delete_var_value(variable);
-    variable.vtype = info.type;
-    variable.value = parent->allocate(info.type);
+    void* addr = parent->allocate(info.type);
     switch(info.type){
         case VariableType::INT:
-            memcpy(variable.value, info.value, sizeof(int64_t));
+            memcpy(addr, info.value, sizeof(int64_t));
             break;
         case VariableType::STRING:
-            variable.value = new(variable.value)std::string(*static_cast<std::string*>(info.value));
+            addr = new(addr)std::string(static_cast<std::string*>(info.value)->c_str());
             break;
         default:
             error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value: invalid type");
     }
     parent->dispose_value(info);
+    parent->set_variable(stmt->ident.value.value(), info.type, addr);
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
@@ -135,9 +135,10 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpPa
         std::cerr << "Invalid identifier" << std::endl;
         exit(1);
     }
+    auto var = parent->get_variable(term->ident.value.value());
     return {
-            .type = parent->get_variable(term->ident.value.value()).vtype,
-            .value = parent->get_variable(term->ident.value.value()).value,
+            .type = var.value()->vtype,
+            .value = var.value()->value,
             .line = term->line,
             .dealloc_required = false
     };
@@ -255,7 +256,7 @@ void HSharpVE::VirtualEnvironment::PredVisitor::operator()(HSharpParser::NodeIfP
     
 }
 
-void HSharpVE::VirtualEnvironment::delete_var_value(HSharpVE::Variable &variable) {
+void HSharpVE::VirtualEnvironment::delete_var_value(const HSharpVE::Variable &variable) {
     switch(variable.vtype){
         case VariableType::INT:
             integers_pool.free(static_cast<int64_t*>(variable.value));
@@ -275,7 +276,7 @@ void* HSharpVE::VirtualEnvironment::allocate(HSharp::VariableType vtype) {
         case VariableType::STRING:
             return strings_pool.allocate();
         default:
-            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot delete value: invalid type");
+            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot allocate value: invalid type");
     }
 }
 void HSharpVE::VirtualEnvironment::exec_statement(const HSharpParser::NodeStmt* stmt) {
@@ -316,6 +317,7 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     }
 }
 void HSharpVE::VirtualEnvironment::run() {
+    global_scopes.push_back({});
     for (const HSharpParser::NodeStmt* stmt : root.statements)
         exec_statement(stmt);
 }
