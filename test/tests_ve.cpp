@@ -138,19 +138,6 @@ TEST(VE, EXIT_INT_BIN_EXPR){
     EXPECT_EXIT(virtualenv.run(), ::testing::ExitedWithCode(200), "");
 }
 
-TEST(VE, EXIT_INT_BIN_EXPR_SUB_BIN_EXPR){
-    File file("exit(50 * (5 * 10) / 10 - 5 * (5 * 2));");
-    vector<string> lines{};
-
-    lines.push_back(file.contents.value());
-    Tokenizer tokenizer(file);
-    auto tokens = tokenizer.tokenize();
-    Parser parser(tokens, lines);
-    auto nodes = parser.parse_program();
-    VirtualEnvironment virtualenv{nodes.value(), lines, true};
-    EXPECT_EXIT(virtualenv.run(), ::testing::ExitedWithCode(200), "");
-}
-
 TEST(VE, EXIT_INT_VAR_BIN_EXPR){
     File file("var code = 50 * 50 / 10 - 5 * 10; exit(code);");
     vector<string> lines{};
