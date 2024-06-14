@@ -94,14 +94,14 @@ std::optional<HSharpParser::NodeTerm*> HSharpParser::Parser::parse_term() {
             expr->line = 0; // filler
             return expr;
         }
-        case TOK_PAREN_OPEN:{
+        case EToken::PARENTHESIS_OPEN_SIGN:{
             skip();
             std::optional<NodeExpression*> expr = parse_expression();
             if (!expr.has_value())
                 HSharpVE::error(HSharpVE::EExceptionSource::PARSER,
                                 HSharpVE::EExceptionReason::PARSE_ERROR,
                                 "Failed to parse expression!");
-            try_consume(TokenType::TOK_PAREN_CLOSE, 1);
+            try_consume(EToken::PARENTHESIS_CLOSE_SIGN, 1);
             auto term_paren = allocator.emplace<NodeTermParen>(expr.value());
             auto term = allocator.emplace<NodeTerm>(term_paren);
             return term;

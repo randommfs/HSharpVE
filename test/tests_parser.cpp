@@ -3,12 +3,14 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <parser/parser.hpp>
+#include <parser/tokenizer.hpp>
+#include <parser/tokens.hpp>
 #include <parser/nodes.hpp>
 #include <tests.hpp>
 
 using HSharpParser::Tokenizer;
 using HSharpParser::Parser;
-using HSharpParser::TokenType;
+using HSharpParser::EToken;
 using HSharpParser::Token;
 using std::vector;
 using std::string;
