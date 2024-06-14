@@ -18,6 +18,9 @@ namespace HSharpParser{
     struct NodeBinExprSub;
     struct NodeBinExprMul;
     struct NodeBinExprDiv;
+    struct NodeBinExprEq;
+    struct NodeBinExprLess;
+    struct NodeBinExprBig;
     struct NodeStmt;
     struct NodeStmtExit;
     struct NodeStmtInput;
@@ -49,7 +52,10 @@ namespace HSharpParser{
         std::variant<NodeBinExprAdd*,
                 NodeBinExprSub*,
                 NodeBinExprMul*,
-                NodeBinExprDiv*> var;
+                NodeBinExprDiv*,
+                NodeBinExprEq*,
+                NodeBinExprLess*,
+                NodeBinExprBig*> var;
         uint32_t line;
     };
 
@@ -79,6 +85,15 @@ namespace HSharpParser{
         NodeExpression *lhs{}, *rhs{};
     };
     struct NodeBinExprDiv {
+        NodeExpression *lhs{}, *rhs{};
+    };
+    struct NodeBinExprEq {
+        NodeExpression *lhs{}, *rhs{};
+    };
+    struct NodeBinExprLess {
+        NodeExpression *lhs{}, *rhs{};
+    };
+    struct NodeBinExprBig {
         NodeExpression *lhs{}, *rhs{};
     };
 
@@ -118,7 +133,7 @@ namespace HSharpParser{
     struct NodeScope{
         std::vector<NodeStmt*> statements;
     };
-    struct NodePredIfElif{
+    struct NodeIfPredOr{
         NodeExpression* expr;
         NodeScope* scope;
         std::optional<NodeIfPred*> pred;
@@ -127,7 +142,7 @@ namespace HSharpParser{
         NodeScope* scope;
     };
     struct NodeIfPred{
-        std::variant<NodePredIfElif*, NodeIfPredElse*> var;
+        std::variant<NodeIfPredOr*, NodeIfPredElse*> var;
     };
     struct NodeStmtIf{
         NodeExpression* expr;

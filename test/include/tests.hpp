@@ -18,7 +18,10 @@ enum class NodeType{
     ADD,
     SUB,
     MUL,
-    DIV
+    DIV,
+    EQ,
+    LESS,
+    BIG
 };
 
 struct Visitor{
@@ -92,6 +95,21 @@ struct Visitor{
     }
     void operator()(const HSharpParser::NodeBinExprDiv* expr) {
         visitors_executed.push_back(NodeType::DIV);
+        std::visit(*this, expr->lhs->expr);
+        std::visit(*this, expr->lhs->expr);
+    }
+    void operator()(const HSharpParser::NodeBinExprEq* expr) {
+        visitors_executed.push_back(NodeType::EQ);
+        std::visit(*this, expr->lhs->expr);
+        std::visit(*this, expr->lhs->expr);
+    }
+    void operator()(const HSharpParser::NodeBinExprLess* expr) {
+        visitors_executed.push_back(NodeType::LESS);
+        std::visit(*this, expr->lhs->expr);
+        std::visit(*this, expr->lhs->expr);
+    }
+    void operator()(const HSharpParser::NodeBinExprBig* expr) {
+        visitors_executed.push_back(NodeType::BIG);
         std::visit(*this, expr->lhs->expr);
         std::visit(*this, expr->lhs->expr);
     }

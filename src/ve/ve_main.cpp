@@ -1,3 +1,4 @@
+#include "parser/nodes.hpp"
 #include <visitors.hpp>
 #include <algorithm>
 #include <iostream>
@@ -95,11 +96,21 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
-
+    parent->create_scope();
+    for (auto statement : stmt->statements)
+        std::visit(parent->stmtvisitor, statement->statement);
+    parent->destroy_scope();
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtIf *stmt) const {
-
+    ValueInfo vi = std::visit(parent->exprvisitor, stmt->expr->expr);
+    if (static_cast<bool>(*static_cast<int64_t*>(vi.value))){
+        parent->create_scope();
+        for (auto statement : stmt->scope->statements)
+            std::visit(parent->stmtvisitor, statement->statement);
+        parent->destroy_scope();
+    }
+    
 }
 
 HSharp::ValueInfo HSharpVE::VirtualEnvironment::ExpressionVisitor::operator()(HSharpParser::NodeTerm *term) const {
@@ -194,6 +205,55 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HShar
     parent->dispose_value(rhs);
     return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
 }
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprEq* expr) const {
+    auto result = parent->integers_pool.allocate();
+    ValueInfo lhs, rhs;
+    if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    if ((rhs = std::visit(parent->exprvisitor, expr->rhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    *result = *static_cast<int64_t*>(lhs.value) == *static_cast<int64_t*>(rhs.value);
+    parent->dispose_value(lhs);
+    parent->dispose_value(rhs);
+    return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
+}
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprLess *expr) const {
+    auto result = parent->integers_pool.allocate();
+    ValueInfo lhs, rhs;
+    if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    if ((rhs = std::visit(parent->exprvisitor, expr->rhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    *result = *static_cast<int64_t*>(lhs.value) < *static_cast<int64_t*>(rhs.value);
+    parent->dispose_value(lhs);
+    parent->dispose_value(rhs);
+    return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
+}
+HSharp::ValueInfo HSharpVE::VirtualEnvironment::BinExprVisitor::operator()(HSharpParser::NodeBinExprBig* expr) const {
+    auto result = parent->integers_pool.allocate();
+    ValueInfo lhs, rhs;
+    if ((lhs = std::visit(parent->exprvisitor, expr->lhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    if ((rhs = std::visit(parent->exprvisitor, expr->rhs->expr)).type != VariableType::INT)
+        error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Binary expression evaluation impossible: invalid literal type");
+    *result = *static_cast<int64_t*>(lhs.value) > *static_cast<int64_t*>(rhs.value);
+    parent->dispose_value(lhs);
+    parent->dispose_value(rhs);
+    return ValueInfo{.type = VariableType::INT, .value = result, .dealloc_required = true};
+}
+
+void HSharpVE::VirtualEnvironment::PredVisitor::operator()(HSharpParser::NodeIfPredOr* or_) {
+    ValueInfo vi = std::visit(parent->exprvisitor, or_->expr->expr);
+    if (!static_cast<bool>(*static_cast<int64_t*>(vi.value)))
+        return;
+    parent->create_scope();
+    for (auto statement : or_->scope->statements)
+        std::visit(parent->stmtvisitor, statement->statement);
+    parent->destroy_scope();
+}
+void HSharpVE::VirtualEnvironment::PredVisitor::operator()(HSharpParser::NodeIfPredElse* else_) {
+    
+}
 
 void HSharpVE::VirtualEnvironment::delete_var_value(HSharpVE::Variable &variable) {
     switch(variable.vtype){
@@ -222,9 +282,12 @@ void HSharpVE::VirtualEnvironment::exec_statement(const HSharpParser::NodeStmt* 
     std::visit(stmtvisitor, stmt->statement);
 }
 void HSharpVE::VirtualEnvironment::delete_variables() {
-    for (auto var : global_scope)
-        if (var.second.vtype == HSharp::VariableType::STRING)
-            static_cast<std::string*>(var.second.value)->~string();
+    for (auto scope : global_scopes) {
+        std::for_each(std::begin(scope), std::end(scope), [](std::pair<std::string, Variable> f){
+                if (f.second.vtype == HSharp::VariableType::STRING)
+                    static_cast<std::string*>(f.second.value)->~string();
+            });
+    }
     while (!function_scopes.empty()) {
         FunctionScope& ptr = function_scopes.top();
         function_scopes.pop();
@@ -236,7 +299,6 @@ void HSharpVE::VirtualEnvironment::delete_variables() {
         }
         ptr.clear();
     }
-    global_scope.clear();
 }
 void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     if (!data.dealloc_required) return;
@@ -254,8 +316,6 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
     }
 }
 void HSharpVE::VirtualEnvironment::run() {
-    global_scope = {};
-    function_scopes = {};
     for (const HSharpParser::NodeStmt* stmt : root.statements)
         exec_statement(stmt);
 }

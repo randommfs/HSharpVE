@@ -1,3 +1,4 @@
+#include "parser/tokens.hpp"
 #include <optional>
 #include <iostream>
 #include <functional>
@@ -155,8 +156,25 @@ std::optional<HSharpParser::NodeExpression *> HSharpParser::Parser::parse_expres
                     expr->var = allocator.emplace<NodeBinExprDiv>(expr_lhs2, expr_rhs.value());
                     break;
                 }
+                case TOK_EQ_CMP_OP:{
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprEq>(expr_lhs2, expr_rhs.value());
+                    break;
+                }
+                case TOK_LESS_CMP_OP:{
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprLess>(expr_lhs2, expr_rhs.value());
+                    break;
+                }
+                case TOK_BIG_CMP_OP:{
+                    expr_lhs2->expr = expr_lhs->expr;
+                    expr->var = allocator.emplace<NodeBinExprBig>(expr_lhs2, expr_rhs.value());
+                    break;
+                }
                 default:
-                    assert(false);
+                    HSharpVE::error(HSharpVE::EExceptionSource::PARSER,
+                                    HSharpVE::EExceptionReason::PARSE_ERROR,
+                                    "Failed to parse expression");
             }
             expr_lhs->expr = expr;
         }
@@ -186,8 +204,8 @@ std::optional<HSharpParser::NodeScope*> HSharpParser::Parser::parse_scope() {
 
 std::optional<HSharpParser::NodeIfPred*> HSharpParser::Parser::parse_if_pred() {
     if (try_consume(TOK_OR)){
-        try_consume(TOK_PAREN_OPEN, 1);
-        auto elif = allocator.alloc<NodePredIfElif>();
+        try_consume(TOK_CURLY_OPEN, 1);
+        auto elif = allocator.alloc<NodeIfPredOr>();
         if (auto expr = parse_expression())
             elif->expr = expr.value();
         else
@@ -195,7 +213,7 @@ std::optional<HSharpParser::NodeIfPred*> HSharpParser::Parser::parse_if_pred() {
                             HSharpVE::EExceptionReason::PARSE_ERROR,
                             "Failed to parse expression");
 
-        try_consume(TOK_PAREN_CLOSE, 1);
+        try_consume(TOK_CURLY_CLOSE, 1);
         if (auto scope = parse_scope())
             elif->scope = scope.value();
         else

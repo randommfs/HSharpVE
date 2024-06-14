@@ -1,5 +1,6 @@
 #pragma once
 
+#include "parser/nodes.hpp"
 #include <unordered_map>
 #include <stack>
 
@@ -75,11 +76,21 @@ namespace HSharpVE {
             ValueInfo operator()(HSharpParser::NodeBinExprSub* expr) const;
             ValueInfo operator()(HSharpParser::NodeBinExprMul* expr) const;
             ValueInfo operator()(HSharpParser::NodeBinExprDiv* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprEq* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprLess* expr) const;
+            ValueInfo operator()(HSharpParser::NodeBinExprBig* expr) const;
         };
-        
+        struct PredVisitor {
+        private:
+            VirtualEnvironment* parent;
+        public:
+            explicit PredVisitor(VirtualEnvironment* parent) : parent(parent){}
+            void operator()(HSharpParser::NodeIfPredOr* or_);
+            void operator()(HSharpParser::NodeIfPredElse* else_);
+        };
         HSharpParser::NodeProgram root;
         std::vector<std::string>& lines;
-        Scope global_scope;
+        std::vector<Scope> global_scopes;
         std::stack<FunctionScope> function_scopes;
         FunctionScope* fscopes_top;
         hpool::HPool<std::int64_t> integers_pool;
@@ -90,6 +101,7 @@ namespace HSharpVE {
         BinExprVisitor binexprvisitor{this};
         bool verbose;
         bool is_current_scope_global;
+        bool is_in_function;
 
         void exec_statement(const HSharpParser::NodeStmt* stmt);
 
@@ -110,12 +122,13 @@ namespace HSharpVE {
         explicit VirtualEnvironment(HSharpParser::NodeProgram root, std::vector<std::string>& lines, const bool verbose)
             : root(std::move(root)),
               lines(lines),
-              global_scope{},
+              global_scopes{},
               function_scopes{},
               integers_pool(16),
               strings_pool(16),
               verbose(verbose),
-              is_current_scope_global(true){}
+              is_current_scope_global(true),
+              is_in_function(false){}
 
         ~VirtualEnvironment() {
             delete_variables();

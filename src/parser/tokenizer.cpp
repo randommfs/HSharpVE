@@ -1,3 +1,4 @@
+#include "parser/tokens.hpp"
 #include <vector>
 #include <string>
 
@@ -14,6 +15,9 @@ bool HSharpParser::is_bin_operator(HSharpParser::TokenType ttype) {
         case TOK_MINUS:
         case TOK_MUL_SIGN:
         case TOK_FSLASH:
+        case TOK_EQ_CMP_OP:
+        case TOK_LESS_CMP_OP:
+        case TOK_BIG_CMP_OP:
             return true;
         default:
             return false;
@@ -22,12 +26,16 @@ bool HSharpParser::is_bin_operator(HSharpParser::TokenType ttype) {
 
 std::optional<int> HSharpParser::bin_precedence(HSharpParser::TokenType ttype){
     switch(ttype){
+        case TOK_EQ_CMP_OP:
+        case TOK_LESS_CMP_OP:
+        case TOK_BIG_CMP_OP:
+            return 0;
         case TOK_PLUS:
         case TOK_MINUS:
-            return 0;
+            return 1;
         case TOK_MUL_SIGN:
         case TOK_FSLASH:
-            return 1;
+            return 2;
         default:
             return {};
     }
@@ -86,7 +94,16 @@ std::vector<Token> HSharpParser::Tokenizer::tokenize() {
             tokens.push_back({.line = line, .ttype = TokenType::TOK_PAREN_CLOSE});
             skip();
         } else if (peek().value() == '=') {
-            tokens.push_back({.line = line, .ttype = TokenType::TOK_EQUALITY_SIGN});
+            if (peek(1).has_value() && peek(1).value() == '=')
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_EQ_CMP_OP});
+            else 
+                tokens.push_back({.line = line, .ttype = TokenType::TOK_EQUALITY_SIGN});
+            skip();
+        } else if (peek().value() == '<') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_LESS_CMP_OP});
+            skip();
+        } else if (peek().value() == '>') {
+            tokens.push_back({.line = line, .ttype = TokenType::TOK_BIG_CMP_OP});
             skip();
         } else if (peek().value() == '/' && peek(1).has_value() && peek(1).value() == '/') {
             skip(2);

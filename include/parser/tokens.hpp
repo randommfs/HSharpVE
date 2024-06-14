@@ -1,6 +1,9 @@
 #pragma once
 
+#include <optional>
 #include <string>
+
+#include <cstdint>
 
 #include <boost/preprocessor.hpp>
 
@@ -40,6 +43,9 @@ namespace HSharpParser{
 (TOK_FSLASH)\
 (TOK_MUL_SIGN)\
 (TOK_EQUALITY_SIGN)\
+(TOK_EQ_CMP_OP)\
+(TOK_LESS_CMP_OP)\
+(TOK_BIG_CMP_OP)\
 (TOK_PAREN_OPEN)\
 (TOK_PAREN_CLOSE)\
 (TOK_CURLY_OPEN)\

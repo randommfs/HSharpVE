@@ -10,7 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Compilation flags
-set(DEBUG_COMPILE_FLAGS "-Wall -O0 -ggdb3")
+set(DEBUG_COMPILE_FLAGS "-Wall -O0 -ggdb3 -fsanitize=leak -fsanitize=undefined -fsanitize=address")
 set(DEBUG_LINKER_FLAGS )
 set(RELEASE_COMPILE_FLAGS "-Wall -O2 -fdata-sections -ffunction-sections -Wl --gc-sections")
 
