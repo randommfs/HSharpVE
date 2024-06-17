@@ -1,4 +1,5 @@
 #include "ve/exceptions.hpp"
+#include <type_traits>
 #include <visitors.hpp>
 #include <ve/ve.hpp>
 
@@ -34,15 +35,18 @@ bool VirtualEnvironment::variable_exists(std::string &name) {
 }
 
 void VirtualEnvironment::set_variable(std::string& name, VariableType type, void* value) {
-    auto var = get_variable(name);
-    if (!var.has_value()){
+    Variable* var;
+    if (std::optional<Variable*> variable = get_variable(name)){
+        var = variable.value();
+    } else {
         error(EExceptionSource::VIRTUAL_ENV,
             EExceptionReason::UNKNOWN_IDENT,
             "Unknown identifier");
     }
-    delete_var_value(*var.value());
-    var.value()->vtype = type;
-    var.value()->value = value;
+
+    delete_var_value(*var);
+    var->vtype = type;
+    var->value = value;
     int a = 5;
 }
 
@@ -58,10 +62,12 @@ void VirtualEnvironment::set_variable(std::string& name, void* value) {
 }
 
 std::optional<Variable*> VirtualEnvironment::get_variable(std::string& name) {
+    std::cout << "Searching in global scope" << std::endl;
     for (auto scope : global_scopes) 
         if (scope.contains(name))
             return &scope.at(name);
 
+    std::cout << "Searching in function scopes" << std::endl;
     for (auto scope : *fscopes_top)
         if (scope.contains(name))
             return &scope.at(name); 

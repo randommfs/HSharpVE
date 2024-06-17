@@ -99,6 +99,7 @@ namespace HSharpVE {
         StatementVisitor stmtvisitor{this};
         TermVisitor termvisitor{this};
         BinExprVisitor binexprvisitor{this};
+        Variable* the_only_var_here;
         bool verbose;
         bool is_current_scope_global;
         bool is_in_function;
@@ -117,6 +118,7 @@ namespace HSharpVE {
         void dispose_value(ValueInfo& data);
         void delete_var_value(const Variable& variable);
         void* allocate(VariableType vtype);
+        void var_stats();
 
         static bool is_number(const std::string& s);
     public:

@@ -39,7 +39,8 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtExit *stmt) const {
     int64_t exitcode;
-    ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+    //ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+    ValueInfo pair = {.type = parent->the_only_var_here->vtype, .value = parent->the_only_var_here->value};
     switch(pair.type){
         case VariableType::INT:
             exitcode = *static_cast<int64_t*>(pair.value);
@@ -71,6 +72,7 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
         ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
         parent->dispose_value(pair);
         parent->create_variable(stmt->ident.value.value(), pair.type).value = pair.value;
+        parent->the_only_var_here = *parent->get_variable(stmt->ident.value.value());
     }
 }
 
@@ -93,6 +95,8 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
     }
     parent->dispose_value(info);
     parent->set_variable(stmt->ident.value.value(), info.type, addr);
+    parent->the_only_var_here = *parent->get_variable(stmt->ident.value.value());
+    int a = 5; //Dummy
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
@@ -318,12 +322,28 @@ void HSharpVE::VirtualEnvironment::dispose_value(ValueInfo& data) {
 }
 void HSharpVE::VirtualEnvironment::run() {
     global_scopes.push_back({});
-    for (const HSharpParser::NodeStmt* stmt : root.statements)
+    for (const HSharpParser::NodeStmt* stmt : root.statements){
+        int a = 5; //Dummy
+        var_stats();
+        std::cout << std::endl;
         exec_statement(stmt);
+    }
 }
 
 bool HSharpVE::VirtualEnvironment::is_number(const std::string& s) {
     std::string::const_iterator it = s.begin();
     while (it != s.end() && std::isdigit(*it)) ++it;
     return !s.empty() && it == s.end();
+}
+
+void HSharpVE::VirtualEnvironment::var_stats() {
+    std::cout << "Global scopes count: " << global_scopes.size() << std::endl;
+    for (int i = 0; i < global_scopes.size(); ++i)
+        std::cout << "\tSubscope " << i + 1 << " size: " << global_scopes[i].size() << std::endl;
+
+    std::cout << "Function scopes count: " << function_scopes.size() << std::endl;
+    if (!function_scopes.size()) return;
+    std::cout << "Newest scope size: " << function_scopes.top().size() << std::endl;
+    for (int i = 0; i < function_scopes.top().size(); ++i)
+        std::cout << "\tSubscope " << i + 1 << " size: " << function_scopes.top()[i].size() << std::endl;
 }
