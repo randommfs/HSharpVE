@@ -110,7 +110,7 @@ namespace HSharpVE {
         bool variable_exists(std::string& name);
         void set_variable(std::string& name, void* value);
         void set_variable(std::string& name, VariableType type, void* value);
-        std::optional<Variable*> get_variable(std::string& name);
+        Variable& get_variable(std::string& name);
         void create_scope();
         void destroy_scope();
         void delete_variables();

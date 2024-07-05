@@ -5,6 +5,7 @@
 #include <iterator>
 #include <string>
 #include <format>
+#include <memory>
 
 #include <cstring>
 
@@ -39,8 +40,7 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtExit *stmt) const {
     int64_t exitcode;
-    //ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
-    ValueInfo pair = {.type = parent->the_only_var_here->vtype, .value = parent->the_only_var_here->value};
+    ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
     switch(pair.type){
         case VariableType::INT:
             exitcode = *static_cast<int64_t*>(pair.value);
@@ -68,35 +68,19 @@ void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::No
     if (parent->variable_exists(stmt->ident.value.value())) {
         std::cerr << "Variable reinitialization is not allowed\n";
         exit(1);
-    } else {
-        ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
-        parent->dispose_value(pair);
-        parent->create_variable(stmt->ident.value.value(), pair.type).value = pair.value;
-        parent->the_only_var_here = *parent->get_variable(stmt->ident.value.value());
     }
+    ValueInfo pair = std::visit(parent->exprvisitor, stmt->expr->expr);
+    parent->dispose_value(pair);
+    parent->create_variable(stmt->ident.value.value(), pair.type).value = pair.value;
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeStmtVarAssign *stmt) const {
     if (!parent->variable_exists(stmt->ident.value.value()))
         error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value to immediate value");
-    auto variable = parent->get_variable(stmt->ident.value.value());
-    Variable temp;
-    ValueInfo info = std::visit(parent->exprvisitor, stmt->expr->expr);
-    void* addr = parent->allocate(info.type);
-    switch(info.type){
-        case VariableType::INT:
-            memcpy(addr, info.value, sizeof(int64_t));
-            break;
-        case VariableType::STRING:
-            addr = new(addr)std::string(static_cast<std::string*>(info.value)->c_str());
-            break;
-        default:
-            error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot assign value: invalid type");
-    }
-    parent->dispose_value(info);
-    parent->set_variable(stmt->ident.value.value(), info.type, addr);
-    parent->the_only_var_here = *parent->get_variable(stmt->ident.value.value());
-    int a = 5; //Dummy
+    ValueInfo rhs = std::visit(parent->exprvisitor, stmt->expr->expr);
+    Variable& var = parent->get_variable(stmt->ident.value.value());
+    std::cout << "Current var value: " << *static_cast<int64_t*>(rhs.value) << std::endl;
+    parent->set_variable(stmt->ident.value.value(), rhs.type, rhs.value);
 }
 
 void HSharpVE::VirtualEnvironment::StatementVisitor::operator()(HSharpParser::NodeScope *stmt) const {
@@ -139,10 +123,10 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpPa
         std::cerr << "Invalid identifier" << std::endl;
         exit(1);
     }
-    auto var = parent->get_variable(term->ident.value.value());
+    Variable& var = parent->get_variable(term->ident.value.value());
     return {
-            .type = var.value()->vtype,
-            .value = var.value()->value,
+            .type = var.vtype,
+            .value = var.value,
             .line = term->line,
             .dealloc_required = false
     };
@@ -152,7 +136,7 @@ HSharp::ValueInfo HSharpVE::VirtualEnvironment::TermVisitor::operator()(HSharpPa
         std::cerr << "Expression is not valid integer!" << std::endl;
         exit(1);
     }
-    auto num = parent->integers_pool.allocate();
+    int64_t* num = parent->integers_pool.allocate();
     *num = std::stol(term->int_lit.value.value());
     return {.type = VariableType::INT,
             .value = num,
@@ -266,8 +250,9 @@ void HSharpVE::VirtualEnvironment::delete_var_value(const HSharpVE::Variable &va
             integers_pool.free(static_cast<int64_t*>(variable.value));
             break;
         case VariableType::STRING:
-            static_cast<string*>(variable.value)->~string();
+            std::destroy_at(static_cast<string*>(variable.value));
             strings_pool.free(static_cast<string*>(variable.value));
+            const_cast<HSharpVE::Variable&>(variable).value = nullptr;
             break;
         default:
             error(EExceptionSource::VIRTUAL_ENV, EExceptionReason::TYPE_ERROR, "Cannot delete value: invalid type");
