@@ -1,11 +1,13 @@
 #include <cctype>
+#include <cstring>
 #include <format>
+#include <iterator>
 #include <string>
 #include <vector>
 #include <utility>
 
-#include <parser/tokens.hpp>
-#include <parser/tokenizer.hpp>
+#include <parser/tokenizer/tokens.hpp>
+#include <parser/tokenizer/tokenizer.hpp>
 #include <ve/exceptions.hpp>
 
 using namespace HSharpParser;
@@ -19,7 +21,7 @@ std::vector<Token> Tokenizer::tokenize(std::istream& is) {
     while (getline(is, state_.line)) {
         auto position = state_.line.begin();
         while (position != state_.line.end()) {
-            EBet guess = bet(position, state_.line.end());
+            ETokenGroup guess = indetify(position, state_.line.end());
             Token token = read(position, state_.line.end(), guess);
             // post-processing?
             // probably work for parser
@@ -30,22 +32,44 @@ std::vector<Token> Tokenizer::tokenize(std::istream& is) {
     return tokens;
 }
 
-Tokenizer::EBet Tokenizer::bet(std::string::iterator position, std::string::iterator end) {
+Tokenizer::ETokenGroup Tokenizer::indetify(std::string::iterator position, std::string::iterator end) {
     char first = peek(position, end);
-    if (std::isalpha(first)) {
-        return EBet::IDENTIFIER;
-    }
+    // simplest case
     if (std::isdigit(first) || first == '\"') {
-        return EBet::LITERAL;
+        return ETokenGroup::LITERAL;
     }
-    return EBet::SPECIAL;
+    // harder...
+    for (const auto& mSymbol : mReservedSymbols) {
+        if (mSymbol.first == first) {
+            return ETokenGroup::SYMBOL;
+        }
+    }
+    // now check all keywords
+    std::string::iterator window = position;
+    std::string match {first};
+    while (true) {
+        if (const auto found = std::find_if(mKeywords.begin(), mKeywords.end(), [match](const auto& current) -> bool {
+                return current.first.starts_with(match);
+        }); found != mKeywords.end()) {
+            if (!std::strcmp(found->first.c_str(), match.c_str())) {
+                return ETokenGroup::KEYWORD;
+            }
+            std::advance(window, 1);
+            if (window == end) {
+                return ETokenGroup::IDENTIFIER;
+            }
+        } else {
+            break;
+        }
+    }
+    return ETokenGroup::IDENTIFIER;
 }
 
-Token Tokenizer::read(std::string::iterator& position, std::string::iterator end, EBet bet) {
+Token Tokenizer::read(std::string::iterator& position, std::string::iterator end, ETokenGroup bet) {
     switch (bet) {
-        case EBet::IDENTIFIER: return readLiteral(position, end);
-        case EBet::LITERAL: return readLiteral(position, end);
-        case EBet::SPECIAL: return readSpecial(position, end);
+        case ETokenGroup::IDENTIFIER: return readLiteral(position, end);
+        case ETokenGroup::LITERAL: return readLiteral(position, end);
+        case ETokenGroup::SPECIAL: return readSpecial(position, end);
         default: HSHARP_NOT_IMPLEMENTED(HSharpVE::EExceptionSource::TOKENIZER, "enum value out of range");
     }
 }
@@ -102,8 +126,8 @@ Token Tokenizer::readLiteral(std::string::iterator& position, std::string::itera
 
 Token Tokenizer::readSpecial(std::string::iterator& position, std::string::iterator end) {
     if (position != end) {
-        auto type = typings.find(*position);
-        if (type == typings.end()) {
+        auto type = mReservedSymbols.find(*position);
+        if (type == mReservedSymbols.end()) {
             fallback(std::format("{}", *position));
         } else {
             std::string payload; payload.push_back(*position);

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-namespace HSharpParser {
+namespace hsharp {
 
     enum class EToken : std::int_fast8_t {
         BUILTIN_FUNCTION,               // built-in print, exit and so on
@@ -20,8 +20,10 @@ namespace HSharpParser {
         CONTEXT_OPEN_SIGN,              // {               
         CONTEXT_CLOSE_SIGN,             // }
         OWNING_SIGN,                    // .
-        CASCADE_BRANCHING_OPERATOR      // if
-        // 231 more
+        BRANCHING_START,                // if
+        BRANCHING_ALT,                  // else
+        BRANCHING_LIMITED_ALT           // elif
+        // 229 more
     };
 
     std::string toString(EToken token);

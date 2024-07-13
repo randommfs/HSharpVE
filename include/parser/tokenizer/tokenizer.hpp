@@ -1,27 +1,30 @@
 #pragma once
 
-#include <map>
+// STD
+#include <vector>
+#include <string>
 #include <cstdint>
 #include <istream>
+#include <utility>
 #include <optional>
-#include <string>
-#include <vector>
+#include <unordered_map>
 
-#include <parser/nodes.hpp>
+// Local
 #include <ve/exceptions.hpp>
-#include <parser/tokens.hpp>
-#include <arena_alloc/arena.hpp>
+#include <parser/tokenizer/tokens.hpp>
+#include <parser/tokenizer/interfaces/i-token-reader.hpp>
 
-namespace HSharpParser {
+namespace hsharp {
 
     class Tokenizer {
     public:
+
         Tokenizer();
         std::vector<Token> tokenize(std::istream& is);
 
     private:
 
-        inline const static std::map<char, EToken> typings = {
+        inline const static std::unordered_map<char, EToken> mReservedSymbols = {
             std::make_pair(';', EToken::STATEMENT_TERMINATOR),
             std::make_pair('+', EToken::ADDITION_SIGN),
             std::make_pair('-', EToken::SUBTRACTION_SIGN),
@@ -33,6 +36,12 @@ namespace HSharpParser {
             std::make_pair('}', EToken::CONTEXT_CLOSE_SIGN)
         };
 
+        inline const static std::unordered_map<std::string, EToken> mKeywords = {
+            std::make_pair("if", EToken::BRANCHING_START),
+            std::make_pair("else", EToken::BRANCHING_ALT),
+            std::make_pair("elif", EToken::BRANCHING_LIMITED_ALT)
+        };
+
         struct LineSpecialization {
             std::string line;
             std::int32_t num;
@@ -40,14 +49,15 @@ namespace HSharpParser {
         };
         
         struct ErrorSpecialization {
-            HSharpVE::EExceptionReason reason;
+            hsharp::EExceptionReason reason;
             std::string message;
         };
 
-        enum class EBet : std::int_fast8_t {
-            IDENTIFIER,
-            LITERAL,
-            SPECIAL
+        enum class ETokenGroup : std::int_fast8_t {
+            IDENTIFIER, // var name, function etc...
+            LITERAL,    // string or integer constant value
+            SYMBOL,     // special punc signs
+            KEYWORD     // if, else, etc...
         };
 
         [[noreturn]] void fallback(std::string error, std::optional<LineSpecialization> lineSpec = std::nullopt);
@@ -58,9 +68,9 @@ namespace HSharpParser {
         void strip(std::string& line, bool stripBothSides = false);
 
         // reading
-        EBet bet(std::string::iterator position, std::string::iterator end);
+        ETokenGroup indetify(std::string::iterator position, std::string::iterator end);
         char peek(std::string::iterator position, std::string::iterator end);
-        Token read(std::string::iterator& position, std::string::iterator end, EBet bet);
+        Token read(std::string::iterator& position, std::string::iterator end, ETokenGroup bet);
         Token readIdentifier(std::string::iterator& position, std::string::iterator end);
         Token readLiteral(std::string::iterator& position, std::string::iterator end);
         Token readSpecial(std::string::iterator& position, std::string::iterator end);

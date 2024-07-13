@@ -10,9 +10,9 @@
 #define HSHARP_ENUM_CASE(enum_scope, enum_value) case enum_scope::enum_value: return HSHARP_STRINGIFY(enum_value)
 
 #define HSHARP_NOT_IMPLEMENTED(scope, message) \
-    HSharpVE::error(scope, HSharpVE::EExceptionReason::NOT_IMPLEMENTED, message)
+    hsharp::error(scope, hsharp::EExceptionReason::NOT_IMPLEMENTED, message)
 
-namespace HSharpVE {
+namespace hsharp {
 
     // color constants
     constexpr char RESET[] = "\033[0m";
