@@ -1,17 +1,21 @@
 #pragma once
 
 // STD
+#include <map>
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <istream>
 #include <utility>
+#include <memory>
 #include <optional>
 #include <unordered_map>
+#include <initializer_list>
 
 // Local
 #include <ve/exceptions.hpp>
 #include <parser/tokenizer/tokens.hpp>
+#include <parser/tokenizer/common-token-readers.hpp>
 #include <parser/tokenizer/interfaces/i-token-reader.hpp>
 
 namespace hsharp {
@@ -23,6 +27,23 @@ namespace hsharp {
         std::vector<Token> tokenize(std::istream& is);
 
     private:
+
+        enum class ETokenGroup : std::int_fast8_t {
+            IDENTIFIER, // var name, function etc...
+            LITERAL,    // string or integer constant value
+            SYMBOL,     // special punc signs
+            KEYWORD     // if, else, etc...
+        };
+
+        class TokenReaderStorage {
+        public:
+            TokenReaderStorage(std::initializer_list<ETokenGroup> groups);
+            std::shared_ptr<const ITokenReader> getReaderByGroup(ETokenGroup group);
+
+        private:
+            std::unordered_map<ETokenGroup, std::shared_ptr<ITokenReader>> readers_;
+
+        };
 
         inline const static std::unordered_map<char, EToken> mReservedSymbols = {
             std::make_pair(';', EToken::STATEMENT_TERMINATOR),
@@ -36,7 +57,7 @@ namespace hsharp {
             std::make_pair('}', EToken::CONTEXT_CLOSE_SIGN)
         };
 
-        inline const static std::unordered_map<std::string, EToken> mKeywords = {
+        inline const static std::map<std::string, EToken> mKeywords = {
             std::make_pair("if", EToken::BRANCHING_START),
             std::make_pair("else", EToken::BRANCHING_ALT),
             std::make_pair("elif", EToken::BRANCHING_LIMITED_ALT)
@@ -53,13 +74,6 @@ namespace hsharp {
             std::string message;
         };
 
-        enum class ETokenGroup : std::int_fast8_t {
-            IDENTIFIER, // var name, function etc...
-            LITERAL,    // string or integer constant value
-            SYMBOL,     // special punc signs
-            KEYWORD     // if, else, etc...
-        };
-
         [[noreturn]] void fallback(std::string error, std::optional<LineSpecialization> lineSpec = std::nullopt);
 
         // formatting
@@ -70,13 +84,7 @@ namespace hsharp {
         // reading
         ETokenGroup indetify(std::string::iterator position, std::string::iterator end);
         char peek(std::string::iterator position, std::string::iterator end);
-        Token read(std::string::iterator& position, std::string::iterator end, ETokenGroup bet);
-        Token readIdentifier(std::string::iterator& position, std::string::iterator end);
-        Token readLiteral(std::string::iterator& position, std::string::iterator end);
-        Token readSpecial(std::string::iterator& position, std::string::iterator end);
-
-        // char checks
-        bool isIdentifierChar(char ch, bool isFirst = false);
+        
 
     private:
         

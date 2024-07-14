@@ -19,12 +19,14 @@ namespace hsharp {
 
             enum class ETemplate {
                 CUSTOM,             // placeholder for custom errors
+                UNEXPECTED_EOL,     // in case we want input
                 SYMBOL_VIOLATION    // found symbol is not permitted in current context
             };
 
             // error template strings
             static constexpr char tCustomError[] = "error: {}";
             static constexpr char tSymbolViolation[] = "unexpected symbol found: {}";
+            static constexpr char tUnexpectedEOL[] = "unexpected end of line";
 
             Error(const std::string& what, std::size_t where)
             : description_(std::vformat(tCustomError, std::make_format_args(what)))
@@ -71,7 +73,7 @@ namespace hsharp {
         };
 
 
-        virtual WrappedResult process(std::string::iterator position, std::string::iterator end) = 0;
+        virtual WrappedResult process(std::string::iterator position, std::string::iterator end) const = 0;
         virtual ~ITokenReader() = default;
     };
 
@@ -79,6 +81,7 @@ namespace hsharp {
         switch (error) {
             case ETemplate::CUSTOM: return tCustomError;
             case ETemplate::SYMBOL_VIOLATION: return tSymbolViolation;
+            case ETemplate::UNEXPECTED_EOL: return tUnexpectedEOL;
             HSHARP_NOT_IMPLEMENTED(hsharp::EExceptionSource::TOKENIZER, "enum value out of range");
         }
     }

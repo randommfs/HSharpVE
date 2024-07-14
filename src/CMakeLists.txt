@@ -16,7 +16,8 @@ set(TESTS_SRC
 
 set(PARSER_SRC parser/helpers.cpp)
 list(APPEND PARSER_SRC parser/parser.cpp)
-list(APPEND PARSER_SRC parser/tokenizer.cpp)
+list(APPEND PARSER_SRC parser/tokenizer/tokenizer.cpp)
+list(APPEND PARSER_SRC parser/tokenizer/common-readers.cpp)
 
 set(VE_SRC ve/ve_main.cpp)
 list(APPEND VE_SRC ve/stdlib.cpp)
