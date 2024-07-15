@@ -1,6 +1,8 @@
 #pragma once
 
 // STD
+#include <cstdint>
+#include <map>
 #include <memory>
 #include <unordered_map>
 
@@ -43,19 +45,23 @@ namespace hsharp {
     private: struct Private {};
     public:
 
-        static std::shared_ptr<KeywordTokenReader> create(const std::unordered_map<std::string, hsharp::EToken>* mappings);
-        KeywordTokenReader(const std::unordered_map<std::string, hsharp::EToken>* mappings, Private access);
+        static std::shared_ptr<KeywordTokenReader> create(const std::map<std::string, hsharp::EToken>* mappings);
+        KeywordTokenReader(const std::map<std::string, hsharp::EToken>* mappings, Private access);
         // ITokenReader
         virtual WrappedResult process(std::string::iterator position, std::string::iterator end) const override;
         // methods to distinguish keywords from identifers
         using BoundariesTypeAlias = std::pair<
-            std::unordered_map<std::string, hsharp::EToken>::iterator, 
-            std::unordered_map<std::string, hsharp::EToken>::iterator
+            std::map<std::string, hsharp::EToken>::const_iterator, 
+            std::map<std::string, hsharp::EToken>::const_iterator
         >;
         BoundariesTypeAlias tryMatch(const std::string& match, const BoundariesTypeAlias* hint = nullptr) const;
 
     private:
-        const std::unordered_map<std::string, hsharp::EToken>* keywords_;
+        std::size_t findMaxKey(const std::map<std::string, hsharp::EToken>* words);
+
+    private:
+        const std::map<std::string, hsharp::EToken>* keywords_;
+        const std::size_t maxKeywordSize_;
 
     };
 
@@ -67,13 +73,14 @@ namespace hsharp {
     private: struct Private {};
     public:
 
-        static std::shared_ptr<IdentifierTokenReader> create(const std::string* allowed);
-        IdentifierTokenReader(const std::string* allowed, Private access);
+        static std::shared_ptr<IdentifierTokenReader> create(const std::string* allowed, const std::string* firstExcluded);
+        IdentifierTokenReader(const std::string* allowed, const std::string* firstExcluded, Private access);
         // ITokenReader
         virtual WrappedResult process(std::string::iterator position, std::string::iterator end) const override;
 
     private:
         const std::string* allowed_;
+        const std::string* firstExcluded_;
 
     };
 
@@ -89,6 +96,10 @@ namespace hsharp {
         LiteralTokenReader(Private access);
         // ITokenReader
         virtual WrappedResult process(std::string::iterator position, std::string::iterator end) const override;
+
+    private:
+        WrappedResult processInteger(std::string::iterator position, std::string::iterator end) const;
+        WrappedResult processString(std::string::iterator position, std::string::iterator end) const;
 
     };
 

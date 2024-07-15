@@ -1,6 +1,7 @@
 #pragma once
 
 // STD
+#include <concepts>
 #include <map>
 #include <vector>
 #include <string>
@@ -36,14 +37,51 @@ namespace hsharp {
         };
 
         class TokenReaderStorage {
-        public:
-            TokenReaderStorage(std::initializer_list<ETokenGroup> groups);
-            std::shared_ptr<const ITokenReader> getReaderByGroup(ETokenGroup group);
+        public: 
+
+            TokenReaderStorage(std::initializer_list<ETokenGroup> groups) {
+                for (const auto& group : groups) {
+                    switch (group) {
+                        case ETokenGroup::IDENTIFIER:
+                            readers_[group] = IdentifierTokenReader::create(
+                                &allowedIdentifierSymbols, 
+                                &exludedFirstIdentifierSymbols
+                            );
+                            break;
+                        case ETokenGroup::KEYWORD:
+                            readers_[group] = KeywordTokenReader::create(&mKeywords);
+                            break;
+                        case ETokenGroup::LITERAL:
+                            readers_[group] = LiteralTokenReader::create();
+                            break;
+                        case ETokenGroup::SYMBOL:
+                            readers_[group] = SymbolTokenReader::create(&mReservedSymbols);
+                            break;
+                    }
+                }
+            }
+
+            template<typename Reader>
+            std::shared_ptr<Reader> getReaderByGroup(ETokenGroup group) {
+                static_assert(std::derived_from<Reader, ITokenReader>, "Reader should be direvied from ITokenReader");
+                return dynamic_cast<std::shared_ptr<Reader>>(readers_[group]);
+            }
 
         private:
             std::unordered_map<ETokenGroup, std::shared_ptr<ITokenReader>> readers_;
 
         };
+
+        constexpr static std::string yieldIdentifierSymbols() {
+            std::string allowed;
+            for (char curr = 'a'; curr < 'z'; ++curr) {
+                allowed.push_back(curr);
+            }
+            return allowed;
+        }
+
+        inline const static std::string allowedIdentifierSymbols = yieldIdentifierSymbols();
+        inline const static std::string exludedFirstIdentifierSymbols = "";
 
         inline const static std::unordered_map<char, EToken> mReservedSymbols = {
             std::make_pair(';', EToken::STATEMENT_TERMINATOR),
@@ -84,7 +122,6 @@ namespace hsharp {
         // reading
         ETokenGroup indetify(std::string::iterator position, std::string::iterator end);
         char peek(std::string::iterator position, std::string::iterator end);
-        
 
     private:
         
@@ -92,6 +129,9 @@ namespace hsharp {
             std::string line;
             std::int32_t num;
         } state_;
+
+        TokenReaderStorage readers_;
+
     };
 
 }

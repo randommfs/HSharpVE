@@ -1,15 +1,17 @@
 #pragma once
 
+// STD
 #include <optional>
 #include <string>
 #include <vector>
-#include <variant>
 
-#include <parser/nodes.hpp>
+// Local
 #include <arena_alloc/arena.hpp>
-#include <parser/tokens.hpp>
+#include <parser/parser/nodes.hpp>
+#include <parser/tokenizer/tokens.hpp>
 
-namespace HSharpParser {
+
+namespace hsharp {
 
     bool is_bin_operator(EToken ttype);
     std::optional<int> bin_precedence(EToken ttype);
