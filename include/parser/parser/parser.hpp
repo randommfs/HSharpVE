@@ -6,7 +6,7 @@
 #include <vector>
 
 // Local
-#include <arena_alloc/arena.hpp>
+#include <common/arena.hpp>
 #include <parser/parser/nodes.hpp>
 #include <parser/tokenizer/tokens.hpp>
 

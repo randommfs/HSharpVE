@@ -27,7 +27,7 @@ std::vector<Token> Tokenizer::tokenize(std::istream& is) {
         while (position != state_.line.end()) {
             ETokenGroup guess = indetify(position, end);
             std::shared_ptr<const ITokenReader> reader = readers_.getReaderByGroup<ITokenReader>(guess);
-            ITokenReader::WrappedResult result = reader->process(position, end);
+            ITokenReader::WrappedTokenResult result = reader->process(position, end);
 
             if (result.isError()) {
                 fallback(result.getError().describe());

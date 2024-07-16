@@ -1,13 +1,17 @@
-#include "parser/tokenizer/interfaces/i-token-reader.hpp"
-#include "parser/tokenizer/tokens.hpp"
-#include <algorithm>
-#include <cctype>
-#include <iterator>
+// STD
 #include <memory>
-#include <parser/tokenizer/common-token-readers.hpp>
+#include <cctype>
 #include <utility>
+#include <iterator>
+#include <algorithm>
+
+// Local
+#include <parser/tokenizer/tokens.hpp>
+#include <parser/tokenizer/common-token-readers.hpp>
+#include <parser/tokenizer/interfaces/i-token-reader.hpp>
 
 using namespace hsharp;
+
 
 std::shared_ptr<SymbolTokenReader> SymbolTokenReader::create(const std::unordered_map<char, hsharp::EToken>* mappings) {
     return std::make_shared<SymbolTokenReader>(mappings, Private());

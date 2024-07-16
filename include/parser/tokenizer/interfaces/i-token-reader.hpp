@@ -66,7 +66,7 @@ namespace hsharp {
             Token& getResult() { return std::get<Token>(result_); }
 
         private:
-            WrappedResult(std::variant<Token, Error> result);
+            WrappedResult(std::variant<Token, Error> result) : result_(std::move(result)) {}
 
         private:
             std::variant<Token, Error> result_;
