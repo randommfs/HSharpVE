@@ -32,8 +32,8 @@ namespace hsharp {
         struct Expression;
 
         struct BinaryExpressionMixin {
-            std::unique_ptr<Expression> lhs;
-            std::unique_ptr<Expression> rhs;
+            Expression* lhs;
+            Expression* rhs;
         };
 
         /* Binary expressions */
@@ -44,17 +44,17 @@ namespace hsharp {
 
         struct BinaryExpression : Node {
             std::variant<
-                std::unique_ptr<BinaryAddition>, 
-                std::unique_ptr<BinarySubstraction>, 
-                std::unique_ptr<BinaryMultiplication>, 
-                std::unique_ptr<BinaryDivision>
+                BinaryAddition*, 
+                BinarySubstraction*, 
+                BinaryMultiplication*, 
+                BinaryDivision*
             > expression;
         };
 
         struct Term : Node {
             std::variant<
-                std::unique_ptr<Literal>, 
-                std::unique_ptr<Identificator>
+                Literal*, 
+                Identificator*
             > term;
         };
 
@@ -62,13 +62,13 @@ namespace hsharp {
         struct Expression 
             : public Node {
             std::variant<
-                std::unique_ptr<Term>, 
-                std::unique_ptr<BinaryExpression>
+                Term*, 
+                BinaryExpression*
             > expression;
         };
 
         struct Parent {
-            std::unique_ptr<Expression> expression;
+            Expression* expression;
         };
 
 
@@ -76,28 +76,28 @@ namespace hsharp {
 
             /* Statement nodes */
             struct Exit {
-                std::unique_ptr<Expression> expression;
+                Expression* expression;
             };
 
             struct Print {
-                std::unique_ptr<Expression> expression;
+                Expression* expression;
             };
 
             struct Input {
-                std::unique_ptr<Expression> expression;
+                Expression* expression;
             };
 
             struct Var {
-                std::unique_ptr<Expression> expression;
+                Expression* expression;
             };
 
             struct Statement 
                 : public Node {
                 std::variant<
-                    std::unique_ptr<Exit>,
-                    std::unique_ptr<Print>,
-                    std::unique_ptr<Input>,
-                    std::unique_ptr<Var>
+                    Exit*,
+                    Print*,
+                    Input*,
+                    Var*
                 > statement;
             };
 
@@ -105,7 +105,7 @@ namespace hsharp {
 
         /* Start of AST */
         struct Program {
-            std::vector<std::unique_ptr<builtin::Statement>> statements;
+            std::vector<builtin::Statement> statements;
         };
 
     }
