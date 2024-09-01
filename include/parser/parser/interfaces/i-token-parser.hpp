@@ -1,6 +1,7 @@
 #pragma once
 
 // STD
+#include <memory>
 #include <vector>
 
 // Local
@@ -10,7 +11,6 @@
 
 namespace hsharp {
 
-    template<typename NodeGroup>
     class ITokenParser {
     public:
 
@@ -20,18 +20,18 @@ namespace hsharp {
         public:
             static WrappedResult wrapError(const std::string& what)
             { return WrappedResult(Error()); }
-            static WrappedResult wrapResult(NodeGroup node)
+            static WrappedResult wrapResult(nodes::Node node)
             { return WrappedResult(std::move(node)); }
 
             bool isError() { return std::holds_alternative<Error>(result_); }
             Error& getError() { return std::get<Error>(result_); }
-            NodeGroup& getResult() { return std::get<NodeGroup>(result_); }
+            nodes::Node& getResult() { return std::get<nodes::Node>(result_); }
 
         private:
-            WrappedResult(std::variant<NodeGroup, Error> result) : result_(std::move(result)) {}
+            WrappedResult(std::variant<nodes::Node, Error> result) : result_(std::move(result)) {}
 
         private:
-            std::variant<NodeGroup, Error> result_;
+            std::variant<nodes::Node, Error> result_;
         };
 
         virtual WrappedResult process(
@@ -39,6 +39,26 @@ namespace hsharp {
             std::vector<Token>::iterator end
         ) = 0;
         virtual ~ITokenParser() = default;
+
+    };
+
+    enum class EParsingField : std::int_fast8_t {
+        STATEMENT = 0, 
+        EXPRESION = 1, 
+        TERM = 2
+    };
+
+    class ParserStorage 
+        : std::enable_shared_from_this<ParserStorage> {
+    private: struct Private { };
+    public:
+        std::shared_ptr<ParserStorage> create(std::initializer_list<EParsingField> fields);
+        ParserStorage(std::initializer_list<EParsingField> fields, Private access);
+
+        std::weak_ptr<ITokenParser> getParser(EParsingField field); 
+
+    private:
+        std::map<EParsingField, std::shared_ptr<EParsingField>> mapper_;
 
     };
 

@@ -1,7 +1,6 @@
 #pragma once
 
 // STD
-#include <cstdint>
 #include <map>
 #include <memory>
 #include <unordered_map>

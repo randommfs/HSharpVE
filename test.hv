@@ -1,0 +1,8 @@
+var str = 50;
+var num = "50";
+str = "50";
+num = 50;
+print(str);
+print(num);
+print(5 + 10);
+exit(num);

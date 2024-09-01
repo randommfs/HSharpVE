@@ -13,6 +13,8 @@
 
 namespace hsharp {
 
+    inline constexpr std::size_t DefaultArenaSize = 1024 * 1024 * 8;
+
     class ArenaDeleter;
 
     class ArenaAllocator 
@@ -80,9 +82,13 @@ namespace hsharp {
 
     };
 
+    inline static std::shared_ptr<ArenaAllocator> Arena = 
+        std::make_shared<ArenaAllocator>(DefaultArenaSize); 
+    
     class ArenaDeleter {
     public:
 
+        ArenaDeleter() : allocator_(*Arena) {}
         ArenaDeleter(ArenaAllocator& allocator) : allocator_(allocator) {}
 
         template<typename T>
@@ -96,4 +102,8 @@ namespace hsharp {
         ArenaAllocator& allocator_;
 
     };
+
+    template<typename T>
+    using arena_ptr = std::unique_ptr<T, ArenaDeleter>;
+    
 }

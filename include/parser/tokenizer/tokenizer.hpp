@@ -44,7 +44,7 @@ namespace hsharp {
                         case ETokenGroup::IDENTIFIER:
                             readers_[group] = IdentifierTokenReader::create(
                                 &allowedIdentifierSymbols, 
-                                &exludedFirstIdentifierSymbols
+                                &excludedFirstIdentifierSymbols
                             );
                             break;
                         case ETokenGroup::KEYWORD:
@@ -62,7 +62,7 @@ namespace hsharp {
 
             template<typename Reader>
             std::shared_ptr<Reader> getReaderByGroup(ETokenGroup group) {
-                static_assert(std::derived_from<Reader, ITokenReader>, "Reader should be direvied from ITokenReader");
+                static_assert(std::derived_from<Reader, ITokenReader>, "Reader should be derived from ITokenReader");
                 return dynamic_cast<std::shared_ptr<Reader>>(readers_[group]);
             }
 
