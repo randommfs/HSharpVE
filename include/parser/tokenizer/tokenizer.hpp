@@ -2,12 +2,10 @@
 
 // STD
 #include <concepts>
-#include <map>
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <istream>
-#include <utility>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -15,6 +13,7 @@
 
 // Local
 #include <ve/exceptions.hpp>
+#include <mapbox/eternal.hpp>
 #include <parser/tokenizer/tokens.hpp>
 #include <parser/tokenizer/common-token-readers.hpp>
 #include <parser/tokenizer/interfaces/i-token-reader.hpp>
@@ -82,24 +81,22 @@ namespace hsharp {
 
         inline const static std::string allowedIdentifierSymbols = yieldIdentifierSymbols();
         inline const static std::string exludedFirstIdentifierSymbols = "";
-
-        inline const static std::unordered_map<char, EToken> mReservedSymbols = {
-            std::make_pair(';', EToken::STATEMENT_TERMINATOR),
-            std::make_pair('+', EToken::ADDITION_SIGN),
-            std::make_pair('-', EToken::SUBTRACTION_SIGN),
-            std::make_pair('*', EToken::STAR_SIGN),
-            std::make_pair('=', EToken::ASSIGNMENT_SIGN),
-            std::make_pair('(', EToken::PARENTHESIS_OPEN_SIGN),
-            std::make_pair(')', EToken::PARENTHESIS_CLOSE_SIGN),
-            std::make_pair('{', EToken::CONTEXT_OPEN_SIGN),
-            std::make_pair('}', EToken::CONTEXT_CLOSE_SIGN)
-        };
-
-        inline const static std::map<std::string, EToken> mKeywords = {
-            std::make_pair("if", EToken::BRANCHING_START),
-            std::make_pair("else", EToken::BRANCHING_ALT),
-            std::make_pair("elif", EToken::BRANCHING_LIMITED_ALT)
-        };
+        constexpr static const auto mReservedSymbols = mapbox::eternal::map<char, EToken>({
+            { ';', EToken::STATEMENT_TERMINATOR },
+            { '+', EToken::ADDITION_SIGN },
+            { '-', EToken::SUBTRACTION_SIGN },
+            { '*', EToken::STAR_SIGN },
+            { '=', EToken::ASSIGNMENT_SIGN },
+            { '(', EToken::PARENTHESIS_OPEN_SIGN },
+            { ')', EToken::PARENTHESIS_CLOSE_SIGN },
+            { '{', EToken::CONTEXT_OPEN_SIGN },
+            { '}', EToken::CONTEXT_CLOSE_SIGN }
+        });
+        constexpr static const auto mKeywords = mapbox::eternal::map<mapbox::eternal::string, EToken>({
+            { "if", EToken::BRANCHING_START },
+            { "else", EToken::BRANCHING_ALT },
+            { "or", EToken::BRANCHING_LIMITED_ALT }
+        });
 
         struct LineSpecialization {
             std::string line;
@@ -120,7 +117,7 @@ namespace hsharp {
         void strip(std::string& line, bool stripBothSides = false);
 
         // reading
-        ETokenGroup indetify(std::string::iterator position, std::string::iterator end);
+        ETokenGroup identify(std::string::iterator position, std::string::iterator end);
         char peek(std::string::iterator position, std::string::iterator end);
 
     private:

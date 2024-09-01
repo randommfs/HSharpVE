@@ -25,7 +25,7 @@ std::vector<Token> Tokenizer::tokenize(std::istream& is) {
         auto position = state_.line.begin();
         auto end = state_.line.end();
         while (position != state_.line.end()) {
-            ETokenGroup guess = indetify(position, end);
+            ETokenGroup guess = identify(position, end);
             std::shared_ptr<const ITokenReader> reader = readers_.getReaderByGroup<ITokenReader>(guess);
             ITokenReader::WrappedResult result = reader->process(position, end);
 
@@ -43,7 +43,7 @@ std::vector<Token> Tokenizer::tokenize(std::istream& is) {
     return tokens;
 }
 
-Tokenizer::ETokenGroup Tokenizer::indetify(std::string::iterator position, std::string::iterator end) {
+Tokenizer::ETokenGroup Tokenizer::identify(std::string::iterator position, std::string::iterator end) {
     char first = peek(position, end);
     // simplest case
     if (std::isdigit(first) || first == '\"') {

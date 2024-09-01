@@ -4,7 +4,6 @@ project(HSharpVE LANGUAGES CXX C VERSION 0.0)
 
 set(MAIN_SRC
     src/main/main.cpp
-    src/main/string_split.cpp
     src/main/arguments_handler.cpp
 PARENT_SCOPE)
 
@@ -14,8 +13,7 @@ set(TESTS_SRC
     test/tests_ve.cpp
     PARENT_SCOPE)
 
-set(PARSER_SRC parser/helpers.cpp)
-list(APPEND PARSER_SRC parser/parser.cpp)
+set(PARSER_SRC parser/parser.cpp)
 list(APPEND PARSER_SRC parser/tokenizer/tokenizer.cpp)
 list(APPEND PARSER_SRC parser/tokenizer/common-readers.cpp)
 
