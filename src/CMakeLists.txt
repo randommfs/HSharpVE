@@ -14,9 +14,7 @@ set(TESTS_SRC
     test/tests_ve.cpp
     PARENT_SCOPE)
 
-set(PARSER_SRC parser/helpers.cpp)
-list(APPEND PARSER_SRC parser/parser.cpp)
-list(APPEND PARSER_SRC parser/tokenizer.cpp)
+set(PARSER_SRC parser/parser.cpp)
 
 set(VE_SRC ve/ve_main.cpp)
 list(APPEND VE_SRC ve/stdlib.cpp)
@@ -27,3 +25,5 @@ add_library(ve STATIC ${VE_SRC})
 
 target_include_directories(parser PUBLIC ${INCLUDE_DIR})
 target_include_directories(ve PUBLIC ${INCLUDE_DIR})
+
+target_link_libraries(parser PUBLIC pog)

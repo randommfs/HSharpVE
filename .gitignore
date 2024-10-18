@@ -40,3 +40,5 @@ test.hv
 .idea
 cmake-build-debug
 venv
+.vscode
+out

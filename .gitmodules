@@ -1,3 +1,9 @@
 [submodule "contrib/hpool"]
 	path = contrib/hpool
 	url = https://github.com/randommfs/HPool.git
+[submodule "contrib/pog"]
+	path = contrib/pog
+	url = https://github.com/metthal/pog
+[submodule "contrib/eternal"]
+	path = contrib/eternal
+	url = https://github.com/mapbox/eternal.git
