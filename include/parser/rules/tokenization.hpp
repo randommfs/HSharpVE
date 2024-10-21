@@ -29,9 +29,14 @@ namespace HSharpParser {
 
     using Rule = TokenizerRule<TokenValue>;
 
-    const TokenizerRule<TokenValue> rules[] = {
+    static inline const TokenizerRule<TokenValue> rules[] = {
         Rule().regex("\\s+"),
         Rule().regex("=").symbol("="),
+        Rule().regex("+=").symbol("+="),
+        Rule().regex("-=").symbol("-="),
+        Rule().regex("*=").symbol("*="),
+        Rule().regex("/=").symbol("/="),
+        Rule().regex(";").symbol(";"),
         Rule().regex("(true|false)").symbol("bool").fullword(true).action(_parse_bool),
         Rule().regex("[0-9]+").symbol("int").action(_parse_int),
         Rule().regex(R"("[^"]*")").symbol("string").action(_parse_str),
