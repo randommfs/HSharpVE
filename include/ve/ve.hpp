@@ -7,7 +7,7 @@
 #include <visitors.hpp>
 #include <parser/parser.hpp>
 #include <ve/exceptions.hpp>
-#include <hpool/cpp/hpool.hpp>
+#include <hpool.hpp>
 
 /* Nodes */
 using HSharpParser::NodeStmtInput;
@@ -74,8 +74,8 @@ namespace HSharpVE {
         HSharpParser::NodeProgram root;
         std::vector<std::string>& lines;
         Scope global_scope;
-        hpool::HPool<std::int64_t> integers_pool;
-        hpool::HPool<std::string> strings_pool;
+        hpool::HPool<std::int64_t, hpool::ReallocationPolicy::OffsetRealloc> integers_pool;
+        hpool::HPool<std::string, hpool::ReallocationPolicy::NoReallocations> strings_pool;
         ExpressionVisitor exprvisitor{this};
         StatementVisitor stmtvisitor{this};
         TermVisitor termvisitor{this};

@@ -6,6 +6,7 @@
 #include <parser/parser.hpp>
 #include <main/string_split.h>
 #include <main/arguments_handler.hpp>
+#include <compiler/compiler.hpp>
 
 #include <pog/pog.h>
 
@@ -33,9 +34,11 @@ int main(int argc, char *argv[]) {
         std::cerr << "Cannot open file! Exiting now..." << std::endl;
         exit(1);
     }
-    
-    HSharpParser::Parser parser{};
+    HSharpCompiler::Compiler compiler;
+    HSharpParser::Parser parser{compiler};
     auto report = parser.prepare();
+    std::cout << report.to_string() << '\n';
+    parser.parse(input);
 
     //HSharpVE::VirtualEnvironment ve(root.value(), lines, true); // for now
     //ve.run();

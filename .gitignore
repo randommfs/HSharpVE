@@ -42,3 +42,4 @@ cmake-build-debug
 venv
 .vscode
 out
+**.S

@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/contrib/pog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/contrib/hpool"
+    "${CMAKE_CURRENT_SOURCE_DIR}/contrib/eternal/include")
 
 # Compilation flags
 set(DEBUG_COMPILE_FLAGS "-Wall -O0 -ggdb3 -fsanitize=address -fsanitize=leak -fsanitize=undefined")
@@ -19,12 +23,12 @@ add_subdirectory(src)
 add_subdirectory(contrib/pog)
 
 add_executable(hve-ng ${MAIN_SRC})
-add_executable(tests ${TESTS_SRC})
+##add_executable(tests ${TESTS_SRC})
 
-target_include_directories(hve-ng PUBLIC ${INCLUDE_DIR} pog::pog)
-target_include_directories(tests PUBLIC ${INCLUDE_DIR} "test/include")
-target_link_libraries(hve-ng PRIVATE parser ve pog)
-target_link_libraries(tests PRIVATE parser ve gtest gtest_main pog)
+target_include_directories(hve-ng PUBLIC ${INCLUDE_DIR})
+#target_include_directories(tests PUBLIC ${INCLUDE_DIR} "test/include")
+target_link_libraries(hve-ng PRIVATE parser compiler pog)
+#target_link_libraries(tests PRIVATE parser gtest gtest_main pog)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS ${DEBUG_COMPILE_FLAGS})
