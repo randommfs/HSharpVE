@@ -16,7 +16,7 @@ set(TESTS_SRC
 
 set(PARSER_SRC parser/parser.cpp)
 
-set(COMPILER_SRC compiler/compiler.cpp)
+set(COMPILER_SRC compiler/compiler_noopt.cpp)
 
 set(VE_SRC ve/ve_main.cpp)
 list(APPEND VE_SRC ve/stdlib.cpp)

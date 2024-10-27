@@ -29,7 +29,9 @@ int main(int argc, char *argv[]) {
 
     std::string filename = registry.getFilename();
 
-    std::ifstream input(filename, std::ios::binary | std::ios::ate);
+    std::ifstream input(filename);
+    std::stringstream contents;
+    contents << input.rdbuf();
     if (!input.is_open()) {
         std::cerr << "Cannot open file! Exiting now..." << std::endl;
         exit(1);
@@ -38,7 +40,7 @@ int main(int argc, char *argv[]) {
     HSharpParser::Parser parser{compiler};
     auto report = parser.prepare();
     std::cout << report.to_string() << '\n';
-    parser.parse(input);
+    parser.parse(contents.str());
 
     //HSharpVE::VirtualEnvironment ve(root.value(), lines, true); // for now
     //ve.run();

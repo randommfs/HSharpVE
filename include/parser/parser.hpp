@@ -43,6 +43,6 @@ namespace HSharpParser {
         Parser(HSharpCompiler::Compiler&);
 
         pog::ParserReport<Value> prepare();
-        std::optional<Value> parse(std::ifstream& contents);
+        std::optional<Value> parse(std::string contents);
     };
 }

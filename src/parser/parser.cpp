@@ -94,8 +94,6 @@ void HSharpParser::Parser::_apply_parser_rules() noexcept {
     parser.rule("var_assign")
         .production("ident", "op", "expr", ";", [](auto&& args)->Value{return {};});
     
-    std::function<Value(std::vector<Value>)> expression_compiler = compile_expr;
-
     // Basic statement parts
     parser.rule("type")
         .production("ident", type_to_token);
@@ -120,8 +118,7 @@ pog::ParserReport<HSharpParser::Value> HSharpParser::Parser::prepare() {
     return parser.prepare();
 }
 
-std::optional<HSharpParser::Value> HSharpParser::Parser::parse(std::ifstream& contents) {
-    std::stringstream input{"5 + 4"};
-    return parser.parse(input);
+std::optional<HSharpParser::Value> HSharpParser::Parser::parse(std::string contents) {
+    return parser.parse(contents);
 }
 
