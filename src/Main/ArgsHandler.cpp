@@ -13,8 +13,8 @@
 #include <string_view>
 
 // Local
-#include <version.hpp>
-#include <main/arguments_handler.hpp>
+#include <VersionInfo.hpp>
+#include <Main/ArgsHandler.hpp>
 
 using namespace hsharp;
 

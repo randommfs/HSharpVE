@@ -1,7 +1,8 @@
-#include "parser/parser.hpp"
 #include <iostream>
 
-#include <compiler/compiler.hpp>
+#include <Compiler/Compiler_NoOptimizations.hpp>
+#include <Compiler/Opcodes.hpp>
+#include <Parser/Parser.hpp>
 
 void HSharpCompiler::Compiler::emit_opcode(HSharpCompiler::Opcode op, std::uint8_t arg) {
     std::cout << "Emitted: [ " << OPCODE_NAMES.at(op).c_str() << " ], arg: [ " << static_cast<std::uint16_t>(arg) << " ]\n";

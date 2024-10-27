@@ -1,14 +1,12 @@
-#include "pog/parser_report.h"
-#include <parser/parser.hpp>
-#include <parser/rules/tokenization.hpp>
-
-#include <mapbox/eternal.hpp>
-
-#include <compiler/compiler.hpp>
-
-#include <pog/pog.h>
 #include <iostream>
 #include <stdexcept>
+
+#include <Parser/Parser.hpp>
+#include <Parser/Rules/Tokenization.hpp>
+#include <Compiler/Compiler_NoOptimizations.hpp>
+
+#include <mapbox/eternal.hpp>
+#include <pog/pog.h>
 
 #define _VISIBILITY_HIDDEN [[gnu::visibility("hidden")]]
 

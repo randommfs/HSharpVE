@@ -1,12 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include <memory>
 
-#include <version.hpp>
-#include <parser/parser.hpp>
-#include <main/string_split.h>
-#include <main/arguments_handler.hpp>
-#include <compiler/compiler.hpp>
+#include <VersionInfo.hpp>
+#include <Parser/Parser.hpp>
+#include <Main/ArgsHandler.hpp>
+#include <Compiler/Compiler_NoOptimizations.hpp>
 
 #include <pog/pog.h>
 
