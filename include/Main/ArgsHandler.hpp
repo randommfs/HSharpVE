@@ -10,7 +10,7 @@
 #include <functional>
 
 // Local
-#include <version.hpp>
+#include <VersionInfo.hpp>
 
 
 namespace hsharp {

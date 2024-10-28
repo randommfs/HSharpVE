@@ -41,33 +41,7 @@ HSharpParser::Parser::Parser(HSharpCompiler::Compiler& compiler) : compiler(comp
     parser.end_token().action([](auto&& args) -> Value {return {};});
 
     _apply_parser_rules();
-
-    this->type_to_tkn = type_to_token;
-    this->compile_expr = [this](auto&& args) -> HSharpParser::Value {
-    std::cout << "Compiling expression\n";
-    HSharpParser::Token& tok1 = std::get<HSharpParser::Token>(args[0]);
-    HSharpParser::Token& tok2 = std::get<HSharpParser::Token>(args[1]);
-    HSharpParser::Token& tok3 = std::get<HSharpParser::Token>(args[2]);
-
-    if (tok1.type != tok3.type && tok1.type != HSharpParser::TokenType::INT_LIT) {
-        std::cout << "Expression could not be compiled!\n";
-        exit(1);
-    }
-
-    try {
-        int lit1 = std::stoi({tok1.str.begin()});
-        int lit2 = std::stoi({tok1.str.begin()});
-        this->compiler.emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit1);
-        this->compiler.emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit2);
-        this->compiler.emit_opcode(HSharpCompiler::Opcode::ADD_BINARY);
-    } catch (std::invalid_argument exc) {
-
-    } catch (std::out_of_range exc ) {
-
-    }
 };
-
-}
 
 void HSharpParser::Parser::_apply_parser_rules() noexcept {
     // Whole program consists out of statements

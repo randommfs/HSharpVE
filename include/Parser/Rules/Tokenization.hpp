@@ -1,11 +1,11 @@
 #pragma once
 
-#include "pog/precedence.h"
 #include <string_view>
 #include <functional>
-#include <variant>
 
-#include <parser/parser.hpp>
+#include <Parser/Parser.hpp>
+
+#include <pog/precedence.h>
 
 namespace HSharpParser {
     using TokenValue = Value;

@@ -3,31 +3,26 @@ cmake_minimum_required(VERSION 3.28)
 project(HSharpVE LANGUAGES CXX C VERSION 0.0)
 
 set(MAIN_SRC
-    src/main/main.cpp
-    src/main/string_split.cpp
-    src/main/arguments_handler.cpp
+    src/Main/Main.cpp
+    src/Main/ArgsHandler.cpp
 PARENT_SCOPE)
 
 set(TESTS_SRC
     test/tests_tokenizer.cpp
     test/tests_parser.cpp
     test/tests_ve.cpp
-    PARENT_SCOPE)
+PARENT_SCOPE)
 
-set(PARSER_SRC parser/parser.cpp)
+set(PARSER_SRC Parser/Parser.cpp)
 
-set(COMPILER_SRC compiler/compiler_noopt.cpp)
-
-set(VE_SRC ve/ve_main.cpp)
-list(APPEND VE_SRC ve/stdlib.cpp)
-list(APPEND VE_SRC ve/exceptions.cpp)
+set(COMPILER_SRC
+    Compiler/Compiler_NoOptimizations.cpp
+    Compiler/Compiler_WithOptimizations.cpp)
 
 add_library(parser STATIC ${PARSER_SRC})
 add_library(compiler STATIC ${COMPILER_SRC})
-#add_library(ve STATIC ${VE_SRC})
 
 target_include_directories(parser PUBLIC ${INCLUDE_DIR})
 target_include_directories(compiler PUBLIC ${INCLUDE_DIR})
-#target_include_directories(ve PUBLIC ${INCLUDE_DIR})
 
 target_link_libraries(parser PUBLIC pog)

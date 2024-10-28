@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+
 #include <pog/pog.h>
 
 namespace HSharpCompiler {
@@ -34,9 +35,6 @@ namespace HSharpParser {
     private:
         pog::Parser<Value> parser;
         HSharpCompiler::Compiler& compiler;
-
-        std::function<Value(std::vector<Value>)> compile_expr;
-        std::function<Value(std::vector<Value>)> type_to_tkn;
 
         void _apply_parser_rules() noexcept;
     public:
