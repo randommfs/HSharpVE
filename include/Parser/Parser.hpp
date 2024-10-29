@@ -5,7 +5,7 @@
 #include <pog/pog.h>
 
 namespace HSharpCompiler {
-    class Compiler;
+    class ICompiler;
 }
 
 namespace HSharpParser {
@@ -34,11 +34,11 @@ namespace HSharpParser {
     class Parser {
     private:
         pog::Parser<Value> parser;
-        HSharpCompiler::Compiler& compiler;
+        HSharpCompiler::ICompiler* compiler;
 
         void _apply_parser_rules() noexcept;
     public:
-        Parser(HSharpCompiler::Compiler&);
+        Parser(HSharpCompiler::ICompiler*);
 
         pog::ParserReport<Value> prepare();
         std::optional<Value> parse(std::string contents);

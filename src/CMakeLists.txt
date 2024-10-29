@@ -17,6 +17,8 @@ set(PARSER_SRC Parser/Parser.cpp)
 
 set(COMPILER_SRC
     Compiler/Compiler_NoOptimizations.cpp
+    Compiler/NoOpts/Expressions.cpp
+    Compiler/NoOpts/Tokens.cpp
     Compiler/Compiler_WithOptimizations.cpp)
 
 add_library(parser STATIC ${PARSER_SRC})

@@ -1,5 +1,5 @@
+#include "pog/html_report.h"
 #include <iostream>
-#include <stdexcept>
 
 #include <Parser/Parser.hpp>
 #include <Parser/Rules/Tokenization.hpp>
@@ -7,24 +7,9 @@
 
 #include <mapbox/eternal.hpp>
 #include <pog/pog.h>
+#include <type_traits>
 
-#define _VISIBILITY_HIDDEN [[gnu::visibility("hidden")]]
-
-_VISIBILITY_HIDDEN
-HSharpParser::Value op_to_token(std::vector<HSharpParser::Value> tok) {
-    std::cout << "Parsed operator: " << std::get<HSharpParser::Token>(tok[0]).str << '\n';
-    return {HSharpParser::Token{ static_cast<HSharpParser::TokenType>(std::get<HSharpParser::Token>(tok[0]).str[0]) }};
-}
-
-_VISIBILITY_HIDDEN
-auto type_to_token = [](auto&& args) -> HSharpParser::Value {
-    auto& tok = std::get<HSharpParser::Token>(args[0]).str;
-
-    std::cout << "Parsed type: " << tok << '\n';
-    return { HSharpParser::Token{ HSharpParser::TokenType::TYPE, tok } };
-};
-
-HSharpParser::Parser::Parser(HSharpCompiler::Compiler& compiler) : compiler(compiler) {
+HSharpParser::Parser::Parser(HSharpCompiler::ICompiler* compiler) : compiler(compiler) {
     // Init tokenizer rules
     for (const auto& rule : rules) {
         auto& builder = parser.token(rule.regex_);
@@ -46,7 +31,6 @@ HSharpParser::Parser::Parser(HSharpCompiler::Compiler& compiler) : compiler(comp
 void HSharpParser::Parser::_apply_parser_rules() noexcept {
     // Whole program consists out of statements
     parser.set_start_symbol("expr");
-
     // It's not one statement - amount of statements is unlimited
     parser.rule("statements")
         .production("statements", "statement", [](auto&& args)->Value{return {};})
@@ -62,32 +46,42 @@ void HSharpParser::Parser::_apply_parser_rules() noexcept {
     
     // Defining statement types
     parser.rule("var_create")
-        .production("type", "ident", "=", "string", ";", [](auto&& args)->Value{return {};});
+        .production("type", "ident", "=", "string", ";", [](auto&& args)->Value{
+            auto& tok1 = std::get<Token>(args[0]);
+            auto& tok2 = std::get<Token>(args[1]);
+            auto& tok3 = std::get<Token>(args[3]);
+
+            std::cout << tok1.str << tok2.str << "=" << tok3.str << ";\n";
+            return {};
+        });
     parser.rule("var_assign")
         .production("ident", "op", "expr", ";", [](auto&& args)->Value{return {};});
     
     // Basic statement parts
     parser.rule("type")
-        .production("ident", type_to_token);
+        .production("ident", compiler->get__parse_ident());
     parser.rule("expr")
-        .production("expr", "+", "expr", compiler.get__compile_expression())
-        .production("int", [](auto&& args)->Value{return std::move(args[0]);});
+        .production("expr", "+", "expr", [](auto&& args) -> Value {
+            return {Token{TokenType::INT_LIT, "5"}};
+        })
+        .production("int", compiler->get__parse_literal());
     
-    parser.rule("lit")
-        .production("bool", [](auto&& args)->Value{return {};})
-        .production("string", [](auto&& args)->Value{return {};})
-        .production("int", [](auto&& args)->Value{return {};});
+    
         
     parser.rule("op")
-        .production("+", [](auto&& args) -> Value { return { }; })
-        .production("-", op_to_token)
-        .production("*", op_to_token)
-        .production("/", op_to_token);
+        .production("+", compiler->get__parse_operator())
+        .production("-", compiler->get__parse_operator())
+        .production("*", compiler->get__parse_operator())
+        .production("/", compiler->get__parse_operator());
+    
     
 }
 
 pog::ParserReport<HSharpParser::Value> HSharpParser::Parser::prepare() {
-    return parser.prepare();
+    auto rep = parser.prepare();
+    pog::HtmlReport report(parser);
+    report.save("report.html");
+    return rep;
 }
 
 std::optional<HSharpParser::Value> HSharpParser::Parser::parse(std::string contents) {

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 
 #include <Parser/Parser.hpp>
@@ -14,13 +16,16 @@ namespace HSharpCompiler {
         std::unordered_map<std::string_view, std::uint64_t> funcs;
     };
 
-    using ParserCallbackType = std::function<HSharpParser::Value(std::vector<HSharpParser::Value>)>;
+    using ParserCallbackType = std::function<HSharpParser::Value(std::vector<HSharpParser::Value>&&)>;
     class ICompiler {
     public:
-        ICompiler();
+        virtual void emit_opcode(Opcode op, std::uint8_t arg = 0) = 0;
 
-        void emit_opcode(Opcode op, std::uint8_t arg = 0);
+        /* Handlers for basic expression parts - operators and tokens*/
+        virtual ParserCallbackType get__parse_operator() noexcept = 0;
+        virtual ParserCallbackType get__parse_literal() noexcept = 0;
+        virtual ParserCallbackType get__parse_ident() noexcept = 0;
 
-        ParserCallbackType get__compile_expression() noexcept;
+        virtual ParserCallbackType get__compile_expression() noexcept = 0;
     };
 }
