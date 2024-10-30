@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+		<style>
+			#parsing-table {
+				width: auto;
+			}
+			#parsing-table td, #parsing-table th {
+				min-width: 2em;
+				max-width: 6em;
+				word-wrap: break-word;
+				text-align: center;
+			}
+			.state-table {
+				width: auto;
+			}
+			.state-table td, .state-table th {
+				word-wrap: break-word;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="navbar navbar-dark bg-dark">
+			<span class="navbar-brand">pog report</span>
+		</nav>
+		<main class="container">
+			<div class="pt-3 row justify-content-center">
+				<div class="col-12 alert alert-danger">
+					<h3 class="font-weight-bold">Issues</h3>
+					<ul>
+						<li><span>Shift-reduce conflict of symbol '/' and rule 'expr → expr op expr' in state 10</span></li><li><span>Shift-reduce conflict of symbol '-' and rule 'expr → expr op expr' in state 10</span></li><li><span>Shift-reduce conflict of symbol '+' and rule 'expr → expr op expr' in state 10</span></li><li><span>Shift-reduce conflict of symbol '*' and rule 'expr → expr op expr' in state 10</span></li>
+					</ul>
+				</div>
+			</div>
+			<div class="pt-3 row justify-content-center">
+				<h3 class="col text-center">Parsing Table</h3>
+				<div class="w-100"></div>
+				<div class="col">
+					<table id="parsing-table" class="table table-bordered table-sm ml-auto mr-auto">
+						<thead class="thead-dark">
+							<tr>
+								<th rowspan="2">State</th>
+								<th colspan="13">Action</th>
+								<th colspan="8">Goto</th>
+							</tr>
+							<tr>
+								<th>@end</th><th>=</th><th>+</th><th>-</th><th>*</th><th>/</th><th>;</th><th>(</th><th>)</th><th>bool</th><th>int</th><th>string</th><th>ident</th><th>@start</th><th>expr</th><th>statements</th><th>statement</th><th>var_create</th><th>var_assign</th><th>type</th><th>op</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td data-toggle="tooltip" data-placement="bottom" title="@start → • expr @end<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true">0</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( • expr )<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state2">s2</a></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → int •" data-html="true"><a href="#state3">s3</a></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="@start → expr • @end<br/>expr → expr • op expr<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true"><a href="#state1">1</a></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="@start → expr • @end<br/>expr → expr • op expr<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true">1</td><td><span class="fa fa-check-square" style="color: green"/></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → + •" data-html="true"><a href="#state4">s4</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → - •" data-html="true"><a href="#state5">s5</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → * •" data-html="true"><a href="#state6">s6</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → / •" data-html="true"><a href="#state7">s7</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op • expr<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state8">8</a></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → ( • expr )<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true">2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( • expr )<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state2">s2</a></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → int •" data-html="true"><a href="#state3">s3</a></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr • op expr<br/>expr → ( expr • )<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true"><a href="#state9">9</a></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → int •" data-html="true">3</td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → int">r10</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="op → + •" data-html="true">4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → +">r11</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → +">r11</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="op → - •" data-html="true">5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → -">r12</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → -">r12</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="op → * •" data-html="true">6</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → *">r13</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → *">r13</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="op → / •" data-html="true">7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → /">r14</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → /">r14</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op • expr<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true">8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( • expr )<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state2">s2</a></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → int •" data-html="true"><a href="#state3">s3</a></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr • op expr<br/>expr → expr op expr •<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true"><a href="#state10">10</a></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → expr • op expr<br/>expr → ( expr • )<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true">9</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → + •" data-html="true"><a href="#state4">s4</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → - •" data-html="true"><a href="#state5">s5</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → * •" data-html="true"><a href="#state6">s6</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → / •" data-html="true"><a href="#state7">s7</a></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr ) •" data-html="true"><a href="#state11">s11</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op • expr<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state8">8</a></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → expr • op expr<br/>expr → expr op expr •<br/>op → • +<br/>op → • -<br/>op → • *<br/>op → • /" data-html="true">10</td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op expr">r8</td><td></td><td data-toggle="tooltip" data-placement="bottom" title="op → + •" data-html="true"><a href="#state4">s4</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → - •" data-html="true"><a href="#state5">s5</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → * •" data-html="true"><a href="#state6">s6</a></td><td data-toggle="tooltip" data-placement="bottom" title="op → / •" data-html="true"><a href="#state7">s7</a></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op expr">r8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → expr op • expr<br/>expr → • expr op expr<br/>expr → • ( expr )<br/>expr → • int" data-html="true"><a href="#state8">8</a></td></tr><tr><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr ) •" data-html="true">11</td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td></td><td></td><td data-toggle="tooltip" data-placement="bottom" title="expr → ( expr )">r9</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="row justify-content-around">
+				<h3 class="col text-center">States</h3>
+				<div class="w-100"></div>
+				<div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state0">
+					<thead class="thead-dark">
+						<tr><th>State 0</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>@start → • expr @end</td></tr><tr><td>expr → • expr op expr</td></tr><tr><td>expr → • ( expr )</td></tr><tr><td>expr → • int</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state1">
+					<thead class="thead-dark">
+						<tr><th>State 1</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>@start → expr • @end</td></tr><tr><td>expr → expr • op expr</td></tr><tr><td>op → • +</td></tr><tr><td>op → • -</td></tr><tr><td>op → • *</td></tr><tr><td>op → • /</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state2">
+					<thead class="thead-dark">
+						<tr><th>State 2</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → ( • expr )</td></tr><tr><td>expr → • expr op expr</td></tr><tr><td>expr → • ( expr )</td></tr><tr><td>expr → • int</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state3">
+					<thead class="thead-dark">
+						<tr><th>State 3</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → int •</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state4">
+					<thead class="thead-dark">
+						<tr><th>State 4</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>op → + •</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state5">
+					<thead class="thead-dark">
+						<tr><th>State 5</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>op → - •</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state6">
+					<thead class="thead-dark">
+						<tr><th>State 6</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>op → * •</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state7">
+					<thead class="thead-dark">
+						<tr><th>State 7</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>op → / •</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state8">
+					<thead class="thead-dark">
+						<tr><th>State 8</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → expr op • expr</td></tr><tr><td>expr → • expr op expr</td></tr><tr><td>expr → • ( expr )</td></tr><tr><td>expr → • int</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state9">
+					<thead class="thead-dark">
+						<tr><th>State 9</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → expr • op expr</td></tr><tr><td>expr → ( expr • )</td></tr><tr><td>op → • +</td></tr><tr><td>op → • -</td></tr><tr><td>op → • *</td></tr><tr><td>op → • /</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state10">
+					<thead class="thead-dark">
+						<tr><th>State 10</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → expr • op expr</td></tr><tr><td>expr → expr op expr •</td></tr><tr><td>op → • +</td></tr><tr><td>op → • -</td></tr><tr><td>op → • *</td></tr><tr><td>op → • /</td></tr>
+					<tbody>
+				</table>
+			</div><div class="col-4">
+				<table class="state-table table table-bordered table-sm ml-auto mr-auto" id="state11">
+					<thead class="thead-dark">
+						<tr><th>State 11</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>expr → ( expr ) •</td></tr>
+					<tbody>
+				</table>
+			</div>
+			</div>
+			<div class="row justify-content-center">
+				<h3 class="col text-center">Automaton (graphviz)</h3>
+				<div class="w-100"></div>
+				<textarea id="automaton" class="textarea form-control text-monospace" style="height: 20em; resize: none; font-size: 12px;" readonly>digraph Automaton {
+node [shape=rect];
+
+0 [label="@start → • expr @end\lexpr → • expr op expr\lexpr → • ( expr )\lexpr → • int\l", xlabel="0"]
+1 [label="@start → expr • @end\lexpr → expr • op expr\lop → • +\lop → • -\lop → • *\lop → • /\l", xlabel="1"]
+2 [label="expr → ( • expr )\lexpr → • expr op expr\lexpr → • ( expr )\lexpr → • int\l", xlabel="2"]
+3 [label="expr → int •\l", xlabel="3"]
+4 [label="op → + •\l", xlabel="4"]
+5 [label="op → - •\l", xlabel="5"]
+6 [label="op → * •\l", xlabel="6"]
+7 [label="op → / •\l", xlabel="7"]
+8 [label="expr → expr op • expr\lexpr → • expr op expr\lexpr → • ( expr )\lexpr → • int\l", xlabel="8"]
+9 [label="expr → expr • op expr\lexpr → ( expr • )\lop → • +\lop → • -\lop → • *\lop → • /\l", xlabel="9"]
+10 [label="expr → expr • op expr\lexpr → expr op expr •\lop → • +\lop → • -\lop → • *\lop → • /\l", xlabel="10"]
+11 [label="expr → ( expr ) •\l", xlabel="11"]
+
+0 -> 1 [label="expr"]
+0 -> 2 [label="("]
+0 -> 3 [label="int"]
+1 -> 4 [label="+"]
+1 -> 5 [label="-"]
+1 -> 6 [label="*"]
+1 -> 7 [label="/"]
+1 -> 8 [label="op"]
+2 -> 9 [label="expr"]
+2 -> 2 [label="("]
+2 -> 3 [label="int"]
+8 -> 10 [label="expr"]
+8 -> 2 [label="("]
+8 -> 3 [label="int"]
+9 -> 4 [label="+"]
+9 -> 5 [label="-"]
+9 -> 6 [label="*"]
+9 -> 7 [label="/"]
+9 -> 11 [label=")"]
+9 -> 8 [label="op"]
+10 -> 4 [label="+"]
+10 -> 5 [label="-"]
+10 -> 6 [label="*"]
+10 -> 7 [label="/"]
+10 -> 8 [label="op"]
+}</textarea>
+				<div class="w-100"></div>
+				<div class="col pt-2 text-center">
+					<button class="btn btn-dark" data-clipboard-target="#automaton">
+						Copy
+					</button>
+				</div>
+			</div>
+			<div class="pt-3 row justify-content-center">
+				<small>Generated: 2024-10-30 17:35:20 -00</small>
+			</div>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+		<script type="text/javascript">
+$(document).ready(function() {
+	$('[data-toggle="tooltip"]').tooltip();
+});
+
+var clipboard = new ClipboardJS('.btn');
+		</script>
+	</body>
+</html>

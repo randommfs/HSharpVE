@@ -36,12 +36,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     HSharpCompiler::Compiler_NoOpt compiler;
-    auto t = compiler.get__parse_literal();
-    std::vector<HSharpParser::Token> args = {
-        {HSharpParser::TokenType::ASSIGN_ADD, ""}
-    };
-    t(std::move(args));
-    std::cout << std::get<HSharpParser::Token>(compiler.get__parse_literal()(std::move).str);
     HSharpParser::Parser parser{&compiler};
     auto report = parser.prepare();
     std::cout << report.to_string() << '\n';

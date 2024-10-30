@@ -10,6 +10,7 @@ namespace HSharpCompiler {
 
 namespace HSharpParser {
     enum TokenType : std::uint_fast8_t {
+        UNDEFINED = 0,
         ASSIGN_ADD,
         ASSIGN_SUB,
         ASSIGN_MUL,
@@ -22,7 +23,8 @@ namespace HSharpParser {
         IDENT,
         INT_LIT,
         STR_LIT,
-        BOOL_LIT
+        BOOL_LIT,
+        EXPR
     };
     struct Token {
         TokenType type;

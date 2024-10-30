@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include <Parser/Parser.hpp>
@@ -11,9 +12,39 @@ namespace HSharpCompiler {
         std::uint8_t arg;
     };
 
+    enum ConstantType : std::uint_fast8_t {
+        STRING,
+        INT,
+        FLOAT
+    };
+
+    using ConstantValue = std::variant<std::string, std::int64_t, double>;
+
+    struct Constant {
+        ConstantType type;
+        ConstantValue value;
+    };
+
     struct CompilerState {
+        std::uint64_t consts_cnt;
         std::vector<Instruction> instructions;
+        std::vector<Constant> consts;
         std::unordered_map<std::string_view, std::uint64_t> funcs;
+
+        std::uint64_t push_const(std::string& value) {
+            consts.push_back({ConstantType::STRING, value});
+            return consts_cnt++;
+        }
+
+        std::uint64_t push_const(std::int64_t& value) {
+            consts.push_back({ConstantType::INT, value});
+            return consts_cnt++;
+        }
+
+        std::uint64_t push_const(double& value) {
+            consts.push_back({ConstantType::FLOAT, value});
+            return consts_cnt++;
+        }
     };
 
     using ParserCallbackType = std::function<HSharpParser::Value(std::vector<HSharpParser::Value>&&)>;

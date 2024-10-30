@@ -1,3 +1,5 @@
+#include "Compiler/Opcodes.hpp"
+#include "Parser/Parser.hpp"
 #include <vector>
 #include <iostream>
 
@@ -18,12 +20,19 @@ HSharpParser::Value HSharpCompiler::Compiler_NoOpt::_compile_expression(std::vec
         int lit2 = std::stoi({tok3.str.begin()});
         emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit1);
         emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit2);
-        emit_opcode(HSharpCompiler::Opcode::ADD_BINARY);
+        emit_opcode([args]() -> HSharpCompiler::Opcode {
+            switch(std::get<HSharpParser::Token>(args[1]).type) {
+            case HSharpParser::TokenType::OP_ADD: return HSharpCompiler::Opcode::ADD_BINARY;
+            case HSharpParser::TokenType::OP_SUB: return HSharpCompiler::Opcode::SUB_BINARY;
+            case HSharpParser::TokenType::OP_MUL: return HSharpCompiler::Opcode::MUL_BINARY;
+            case HSharpParser::TokenType::OP_DIV: return HSharpCompiler::Opcode::DIV_BINARY;
+            default: throw std::runtime_error("nuh uh stfu");
+        }}(), 0);
     } catch (std::invalid_argument exc) {
 
     } catch (std::out_of_range exc ) {
 
     }
-    return {};
+    return HSharpParser::Token{HSharpParser::TokenType::EXPR};
 }
 

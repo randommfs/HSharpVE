@@ -34,17 +34,23 @@ namespace HSharpParser {
     TokenValue _parse_int(std::string_view str) { return {Token{TokenType::INT_LIT, str}}; }
     TokenValue _parse_str(std::string_view str) { return {Token{TokenType::STR_LIT, str}}; }
     TokenValue _parse_ident(std::string_view str) { return {Token{TokenType::IDENT, str}}; }
+    TokenValue _parse_add_op(std::string_view str) { return {Token{TokenType::OP_ADD, str}}; }
+    TokenValue _parse_sub_op(std::string_view str) { return {Token{TokenType::OP_SUB, str}}; }
+    TokenValue _parse_mul_op(std::string_view str) { return {Token{TokenType::OP_MUL, str}}; }
+    TokenValue _parse_div_op(std::string_view str) { return {Token{TokenType::OP_DIV, str}}; }
 
     using Rule = TokenizerRule<TokenValue>;
 
     static inline const TokenizerRule<TokenValue> rules[] = {
         Rule().regex("\\s+"),
         Rule().regex("=").symbol("="),
-        //Rule().regex(R"(\+)").symbol("+").precedence(1, pog::Associativity::Left),
-        Rule().regex("-").symbol("-"),
-        Rule().regex("\\*").symbol("*"),
-        Rule().regex("/").symbol("/"),
+        Rule().regex(R"(\+)").symbol("+").precedence(1, pog::Associativity::Left).action(_parse_add_op),
+        Rule().regex("-").symbol("-").precedence(1, pog::Associativity::Left).action(_parse_sub_op),
+        Rule().regex("\\*").symbol("*").precedence(2, pog::Associativity::Left).action(_parse_mul_op),
+        Rule().regex("/").symbol("/").precedence(2, pog::Associativity::Left).action(_parse_div_op),
         Rule().regex(";").symbol(";"),
+        Rule().regex("\\(").symbol("("),
+        Rule().regex("\\)").symbol(")"),
         Rule().regex("(true|false)").symbol("bool").fullword(true).action(_parse_bool),
         Rule().regex("[0-9]+").symbol("int").action(_parse_int),
         Rule().regex(R"("[^"]*")").symbol("string").action(_parse_str),
