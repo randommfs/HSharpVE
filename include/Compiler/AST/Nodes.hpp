@@ -1,6 +1,10 @@
+#pragma once
+
 #include <variant>
 
 #include <Compiler/ICompiler.hpp>
+
+#include <Parser/Parser.hpp>
 
 namespace HSharpCompiler {
     using HSharpParser::Token;
@@ -14,6 +18,10 @@ namespace HSharpCompiler {
     };
 
     struct NodeTermFloat {
+        Token value;
+    };
+
+    struct NodeTermBoolLit {
         Token value;
     };
 
@@ -52,7 +60,9 @@ namespace HSharpCompiler {
             NodeTermFloat*,
             NodeTermIntLit*,
             NodeTermIdent*,
-            NodeTermString*> term;
+            NodeTermString*,
+            NodeTermBoolLit*,
+            NodeExpr*> term;
     };
 
     struct NodeExpr {

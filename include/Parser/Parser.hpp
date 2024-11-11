@@ -3,9 +3,11 @@
 #include <cstdint>
 
 #include <pog/pog.h>
+#include <variant>
 
 namespace HSharpCompiler {
     class ICompiler;
+    struct NodeExpr;
 }
 
 namespace HSharpParser {
@@ -24,14 +26,26 @@ namespace HSharpParser {
         INT_LIT,
         STR_LIT,
         BOOL_LIT,
+        FLOAT_LIT,
         EXPR
     };
+    
     struct Token {
         TokenType type;
         std::string_view str;
     };
 
-    using Value = std::variant<Token>;
+    enum ParserValueType{
+        EXPRESSION,
+        TOKEN
+    };
+
+    struct ParserValue {
+        ParserValueType type;
+        std::variant<Token, HSharpCompiler::NodeExpr*> value;
+    };
+
+    using Value = ParserValue;
 
     class Parser {
     private:

@@ -6,7 +6,15 @@
 #include <Compiler/Compiler_NoOptimizations.hpp>
 
 HSharpParser::Value HSharpCompiler::Compiler_NoOpt::_parse_operator(std::vector<HSharpParser::Value>&& args) noexcept {
-    return {HSharpParser::Token{static_cast<HSharpParser::TokenType>(std::get<HSharpParser::Token>(args[0]).str.begin()[0])}};
+    if (args[0].type != HSharpParser::TOKEN) return {};
+    return {
+        HSharpParser::ParserValueType::TOKEN,
+        HSharpParser::Token {
+            static_cast<HSharpParser::TokenType>(std::get<Token>(
+                args[0].value
+            ).str.at(0))
+        }
+    };
 }
 
 HSharpParser::Value HSharpCompiler::Compiler_NoOpt::_parse_literal(std::vector<HSharpParser::Value>&& args) noexcept {

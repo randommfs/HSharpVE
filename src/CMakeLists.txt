@@ -17,7 +17,9 @@ set(PARSER_SRC Parser/Parser.cpp)
 
 set(COMPILER_SRC
     Compiler/Compiler_NoOptimizations.cpp
+    Compiler/NoOpts/Statements.cpp
     Compiler/NoOpts/Expressions.cpp
+    Compiler/NoOpts/ExpressionCompiler.cpp
     Compiler/NoOpts/Tokens.cpp
     Compiler/Compiler_WithOptimizations.cpp)
 

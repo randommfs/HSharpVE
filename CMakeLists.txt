@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(INCLUDE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/contrib/pog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/contrib/pog/deps/re2/re2"
     "${CMAKE_CURRENT_SOURCE_DIR}/contrib/hpool"
     "${CMAKE_CURRENT_SOURCE_DIR}/contrib/eternal/include")
 

@@ -15,10 +15,11 @@ namespace HSharpCompiler {
     enum ConstantType : std::uint_fast8_t {
         STRING,
         INT,
-        FLOAT
+        FLOAT,
+        BOOL
     };
 
-    using ConstantValue = std::variant<std::string, std::int64_t, double>;
+    using ConstantValue = std::variant<std::string_view, std::int64_t, double, bool>;
 
     struct Constant {
         ConstantType type;
@@ -31,7 +32,7 @@ namespace HSharpCompiler {
         std::vector<Constant> consts;
         std::unordered_map<std::string_view, std::uint64_t> funcs;
 
-        std::uint64_t push_const(std::string& value) {
+        std::uint64_t push_const(std::string_view& value) {
             consts.push_back({ConstantType::STRING, value});
             return consts_cnt++;
         }
@@ -45,8 +46,12 @@ namespace HSharpCompiler {
             consts.push_back({ConstantType::FLOAT, value});
             return consts_cnt++;
         }
-    };
 
+        std::uint64_t push_const(bool value) {
+            consts.push_back({ConstantType::BOOL, value});
+            return consts_cnt++;
+        }
+    };
     using ParserCallbackType = std::function<HSharpParser::Value(std::vector<HSharpParser::Value>&&)>;
     class ICompiler {
     public:
@@ -58,5 +63,6 @@ namespace HSharpCompiler {
         virtual ParserCallbackType get__parse_ident() noexcept = 0;
 
         virtual ParserCallbackType get__compile_expression() noexcept = 0;
+        virtual ParserCallbackType get__compile_var_creation() noexcept = 0;
     };
 }

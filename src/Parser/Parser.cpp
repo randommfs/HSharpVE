@@ -7,7 +7,6 @@
 
 #include <mapbox/eternal.hpp>
 #include <pog/pog.h>
-#include <type_traits>
 
 HSharpParser::Parser::Parser(HSharpCompiler::ICompiler* compiler) : compiler(compiler) {
     // Init tokenizer rules
@@ -30,7 +29,7 @@ HSharpParser::Parser::Parser(HSharpCompiler::ICompiler* compiler) : compiler(com
 
 void HSharpParser::Parser::_apply_parser_rules() noexcept {
     // Whole program consists out of statements
-    parser.set_start_symbol("expr");
+    parser.set_start_symbol("statement");
     // It's not one statement - amount of statements is unlimited
     parser.rule("statements")
         .production("statements", "statement", [](auto&& args)->Value{return {};})
@@ -46,14 +45,7 @@ void HSharpParser::Parser::_apply_parser_rules() noexcept {
     
     // Defining statement types
     parser.rule("var_create")
-        .production("type", "ident", "=", "string", ";", [](auto&& args)->Value{
-            auto& tok1 = std::get<Token>(args[0]);
-            auto& tok2 = std::get<Token>(args[1]);
-            auto& tok3 = std::get<Token>(args[3]);
-
-            std::cout << tok1.str << tok2.str << "=" << tok3.str << ";\n";
-            return {};
-        });
+        .production("type", "ident", "=", "expr", ";", compiler->get__compile_var_creation());
     parser.rule("var_assign")
         .production("ident", "op", "expr", ";", [](auto&& args)->Value{return {};});
     

@@ -21,12 +21,17 @@ namespace HSharpAllocator {
         Allocator() : pool_(16) { }
 
         template<typename T>
-        T* allocate() noexcept {
+        inline constexpr T* allocate() noexcept {
             return reinterpret_cast<T*>(pool_.allocate());
         }
 
+        template<typename T, typename... Args>
+        inline constexpr T* emplace(Args... args) noexcept {
+            return std::construct_at(allocate<T>(), std::forward<Args>(args)...);
+        }
+
         template<typename T>
-        void free(T* ptr) {
+        inline constexpr void free(T* ptr) {
             pool_.free(reinterpret_cast<_alloc_type*>(ptr));
         }
     };

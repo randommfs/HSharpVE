@@ -30,14 +30,14 @@ namespace HSharpParser {
         constexpr TokenizerRule<ValueT> precedence(int prec, pog::Associativity assoc) { precedence_ = prec; associativity_ = assoc; return *this; }
     };
 
-    TokenValue _parse_bool(std::string_view str) { return {Token{TokenType::BOOL_LIT, str}}; }
-    TokenValue _parse_int(std::string_view str) { return {Token{TokenType::INT_LIT, str}}; }
-    TokenValue _parse_str(std::string_view str) { return {Token{TokenType::STR_LIT, str}}; }
-    TokenValue _parse_ident(std::string_view str) { return {Token{TokenType::IDENT, str}}; }
-    TokenValue _parse_add_op(std::string_view str) { return {Token{TokenType::OP_ADD, str}}; }
-    TokenValue _parse_sub_op(std::string_view str) { return {Token{TokenType::OP_SUB, str}}; }
-    TokenValue _parse_mul_op(std::string_view str) { return {Token{TokenType::OP_MUL, str}}; }
-    TokenValue _parse_div_op(std::string_view str) { return {Token{TokenType::OP_DIV, str}}; }
+    TokenValue _parse_bool(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::BOOL_LIT, str}}; }
+    TokenValue _parse_int(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::INT_LIT, str}}; }
+    TokenValue _parse_str(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::STR_LIT, str}}; }
+    TokenValue _parse_ident(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::IDENT, str}}; }
+    TokenValue _parse_add_op(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::OP_ADD, str}}; }
+    TokenValue _parse_sub_op(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::OP_SUB, str}}; }
+    TokenValue _parse_mul_op(std::string_view str) { return{ParserValueType::TOKEN, Token{TokenType::OP_MUL, str}}; }
+    TokenValue _parse_div_op(std::string_view str) { return {ParserValueType::TOKEN, Token{TokenType::OP_DIV, str}}; }
 
     using Rule = TokenizerRule<TokenValue>;
 

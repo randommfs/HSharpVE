@@ -10,30 +10,9 @@ void HSharpCompiler::Compiler_WithOpts::emit_opcode(HSharpCompiler::Opcode op, s
 }
 
 HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_WithOpts::get__compile_expression() noexcept {
-    return std::bind(&Compiler_WithOpts::_compile_expression, this, std::placeholders::_1);
+    return std::bind(&Compiler_WithOpts::_transform_expression, this, std::placeholders::_1);
 }
 
-HSharpParser::Value HSharpCompiler::Compiler_WithOpts::_compile_expression(std::vector<HSharpParser::Value> args) noexcept {
-    HSharpParser::Token& tok1 = std::get<HSharpParser::Token>(args[0]);
-    HSharpParser::Token& tok3 = std::get<HSharpParser::Token>(args[2]);
-
-    std::cout << "Compiling expression\n";
-
-    if (tok1.type != tok3.type && tok1.type != HSharpParser::TokenType::INT_LIT) {
-        std::cout << "Expression could not be compiled!\n";
-        exit(1);
-    }
-
-    try {
-        int lit1 = std::stoi({tok1.str.begin()});
-        int lit2 = std::stoi({tok3.str.begin()});
-        emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit1);
-        emit_opcode(HSharpCompiler::Opcode::PUSH_CONST, lit2);
-        emit_opcode(HSharpCompiler::Opcode::ADD_BINARY);
-    } catch (std::invalid_argument exc) {
-
-    } catch (std::out_of_range exc ) {
-
-    }
+HSharpParser::Value HSharpCompiler::Compiler_WithOpts::_transform_expression(std::vector<HSharpParser::Value> args) noexcept {
     return {};
 }
