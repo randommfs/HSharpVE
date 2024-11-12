@@ -9,7 +9,7 @@ void HSharpCompiler::Compiler_WithOpts::emit_opcode(HSharpCompiler::Opcode op, s
     std::cout << "Emitted: [ " << OPCODE_NAMES.at(op).c_str() << " ], arg: [ " << static_cast<std::uint16_t>(arg) << " ]\n";
 }
 
-HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_WithOpts::get__compile_expression() noexcept {
+HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_WithOpts::get__transform_expression() noexcept {
     return std::bind(&Compiler_WithOpts::_transform_expression, this, std::placeholders::_1);
 }
 

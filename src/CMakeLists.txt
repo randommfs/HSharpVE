@@ -20,6 +20,7 @@ set(COMPILER_SRC
     Compiler/NoOpts/Statements.cpp
     Compiler/NoOpts/Expressions.cpp
     Compiler/NoOpts/ExpressionCompiler.cpp
+    Compiler/NoOpts/VisitorImpl.cpp
     Compiler/NoOpts/Tokens.cpp
     Compiler/Compiler_WithOptimizations.cpp)
 

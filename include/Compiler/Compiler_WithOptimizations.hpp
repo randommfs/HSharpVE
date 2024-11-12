@@ -28,7 +28,7 @@ namespace HSharpCompiler {
         ParserCallbackType get__parse_literal() noexcept override;
         ParserCallbackType get__parse_ident() noexcept override;
 
-        ParserCallbackType get__compile_expression() noexcept override;
+        ParserCallbackType get__transform_expression() noexcept override;
         ParserCallbackType get__compile_var_creation() noexcept override;
     };
 }

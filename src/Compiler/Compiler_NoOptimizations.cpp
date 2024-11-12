@@ -26,7 +26,7 @@ HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_NoOpt::get__parse_id
 }
 
 /* Expression handler */
-HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_NoOpt::get__compile_expression() noexcept {
+HSharpCompiler::ParserCallbackType HSharpCompiler::Compiler_NoOpt::get__transform_expression() noexcept {
     return std::bind(&Compiler_NoOpt::_transform_expression, this, std::placeholders::_1);
 }
 

@@ -22,7 +22,9 @@ HSharpParser::Value HSharpCompiler::Compiler_NoOpt::_transform_expression(std::v
         case '-': return {.value=allocator.emplace<NodeExpr>(allocator.emplace<NodeBinExpr>(allocator.emplace<NodeBinExprSub>(lhs, rhs)))};
         case '*': return {.value=allocator.emplace<NodeExpr>(allocator.emplace<NodeBinExpr>(allocator.emplace<NodeBinExprMul>(lhs, rhs)))};
         case '/': return {.value=allocator.emplace<NodeExpr>(allocator.emplace<NodeBinExpr>(allocator.emplace<NodeBinExprDiv>(lhs, rhs)))};
-        default: exit(2);
+        default: 
+            std::cout << "Unknown binary expression type\n";
+            exit(2);
     }
     return {};
 }

@@ -13,7 +13,9 @@ namespace HSharpCompiler {
         ADD_BINARY,
         SUB_BINARY,
         MUL_BINARY,
-        DIV_BINARY
+        DIV_BINARY,
+        EXT_OPCODE,
+        STORE_FAST
     };
 
     constexpr static auto OPCODE_NAMES = mapbox::eternal::map<Opcode, mapbox::eternal::string>({
@@ -22,6 +24,8 @@ namespace HSharpCompiler {
         ENTRY(ADD_BINARY),
         ENTRY(SUB_BINARY),
         ENTRY(MUL_BINARY),
-        ENTRY(DIV_BINARY)
+        ENTRY(DIV_BINARY),
+        ENTRY(EXT_OPCODE),
+        ENTRY(STORE_FAST)
     });
 }
