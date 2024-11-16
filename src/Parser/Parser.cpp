@@ -54,7 +54,9 @@ void HSharpParser::Parser::_apply_parser_rules() noexcept {
         .production("ident", compiler->get__parse_ident());
     parser.rule("expr")
         .production("expr", "op", "expr", compiler->get__transform_expression())
-        .production("(", "expr", ")")
+        .production("(", "expr", ")", [](auto&& args) -> Value {
+            return args[1];
+        })
         .production("int", compiler->get__parse_literal());
         
     parser.rule("op")

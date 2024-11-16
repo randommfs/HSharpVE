@@ -14,11 +14,11 @@ namespace HSharpAllocator {
     class Allocator {
     private:
         using _alloc_type = char[_internal::_block_size<T_...>];
-        using HPool = hpool::HPool<_alloc_type, hpool::ReallocationPolicy::OffsetRealloc>;
+        using HPool = hpool::HPool<_alloc_type, hpool::ReallocationPolicy::NoReallocations>;
 
         HPool pool_;
     public:
-        Allocator() : pool_(16) { }
+        Allocator() : pool_(512) { }
 
         template<typename T>
         inline constexpr T* allocate() noexcept {

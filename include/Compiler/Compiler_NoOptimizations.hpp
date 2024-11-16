@@ -28,7 +28,7 @@ namespace HSharpCompiler {
         private:
             Compiler_NoOpt& compiler;
         public:
-            TermVisitor(Compiler_NoOpt& compiler) : compiler(compiler) { }
+            explicit TermVisitor(Compiler_NoOpt& compiler) : compiler(compiler) { }
 
             void operator()(NodeTermFloat*);
             void operator()(NodeTermIntLit*);
@@ -42,7 +42,7 @@ namespace HSharpCompiler {
         private:
             Compiler_NoOpt& compiler;
         public:
-            BinExprVisitor(Compiler_NoOpt& compiler) : compiler(compiler) { }
+            explicit BinExprVisitor(Compiler_NoOpt& compiler) : compiler(compiler) { }
 
             void operator()(NodeBinExprAdd*);
             void operator()(NodeBinExprSub*);
