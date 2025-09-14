@@ -1,0 +1,31 @@
+import stl;
+
+fun foo<type Ass>(): none {
+    stl.io:println(stl.reflect.typename(Ass));
+}
+
+fun start(argc: i32, argv: str): i32 {
+    stl.io:println("Hello World!");
+
+    if (5 > 7) {
+        stl.io:println("Hell nah wtf");
+    } otherwise {
+        stl:exit(1);
+    }
+
+    i: u32 = 0;
+    cycle {
+        if (i >= 10) {
+            dont;
+        }
+        stl.io:println("Bwaaaa");
+    }
+
+    arr: [i32] = <{1, 2, 3, 4}>;
+
+    for (item: easy& ... arr) {
+        stl.io:println(item);
+    }
+
+    foo<i32>(); // Prints "i32"
+}
