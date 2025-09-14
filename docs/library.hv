@@ -1,0 +1,11 @@
+export foo_module;
+
+export pub class Test {
+    pub fun test(): void;
+
+    pub i32 t;
+};
+
+export pub stat fun weewee(): none {
+
+}
