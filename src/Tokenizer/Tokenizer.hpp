@@ -34,9 +34,17 @@ namespace HVE {
         OPEN_ANGLE_BRACKET = '<',
         CLOSE_ANGLE_BRACKET = '>',
         REFERENCE = '&',
+        PLUS = '+',
+        MINUS = '-',
+        STAR = '*',
+        SLASH = '/',
+        BACKSLASH = '\\',
         DOT = '.',
         COMMA = ',',
+        SINGLE_QUOTE = '\'',
+        DOUBLE_QUOTE = '"',
         ELLIPSIS,
+        END_OF_FILE,
 
         IDENTIFIER,
         INT_LITERAL,
@@ -44,23 +52,55 @@ namespace HVE {
         STRING_LITERAL,
     };
 
+    enum class TokenizerState {
+      START,
+      END_OF_FILE,
+      IDENT,
+      STRING_LIT,
+      INT_LIT,
+      FLOAT_LIT
+    };
+
+    struct SourceLocation {
+    public:
+      SourceLocation(std::uint32_t _line, std::uint32_t _offset, std::uint64_t _raw_offset)
+        : line(_line)
+        , offset(_offset)
+        , raw_offset(_raw_offset) {}
+      std::uint32_t GetLine();
+      std::uint32_t GetOffset();
+      std::uint64_t GetRawOffset();
+
+    private:
+      std::uint32_t line;
+      std::uint32_t offset;
+      std::uint64_t raw_offset;
+    };
+
     struct Token {
         TokenType type;
-        std::uint32_t line;
-        std::uint32_t offset;
-        std::uint32_t length;
-        std::uint64_t raw_offset;
+        SourceLocation source_loc;
         std::string lexeme;
     };
 
     class Tokenizer {
     public:
-        std::vector<Token> Tokenize(std::string source);
+        Tokenizer(std::string& str) : source(str) {}
+        std::vector<Token> Tokenize();
     private:
+        Token GetNextToken();
+        Token CreateToken(TokenType type, std::string lexeme);
+        SourceLocation CreateSourceLocation();
+        bool SkipWhitespace();
+        bool SkipComments();
+
         char Peek(std::uint8_t offset = 1);
-        char Consume();
+        void Advance();
         std::uint64_t GetCurOffset();
-        std::string source;
-        std::uint64_t cur_offset = 0;
+
+        std::string& source;
+        std::uint64_t cur_raw_offset = 0;
+        std::uint32_t cur_line = 1;
+        std::uint32_t cur_offset = 0;
     };
 };

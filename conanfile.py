@@ -16,7 +16,7 @@ class HSharpVERecipe(ConanFile):
 
     requires = [
         "gtest/1.14.0",
-        "boost/1.87.0",
+        #"boost/1.87.0",
         "spdlog/1.15.0",
         "argparse/3.2",
         "eternal/1.0.1",
