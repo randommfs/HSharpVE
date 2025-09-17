@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "gtest/gtest.h"
 
 #define private public
