@@ -1,6 +1,7 @@
 #include "Tokenizer.hpp"
 #include <cctype>
 #include <cstdint>
+#include <stdexcept>
 
 #include "mapbox/eternal.hpp"
 
