@@ -3,3 +3,5 @@ add_executable(tests
   Tokenizer/Utils.cpp
 )
 target_link_libraries(tests hve-tokenizer gtest::gtest)
+
+add_test(NAME test COMMAND tests)

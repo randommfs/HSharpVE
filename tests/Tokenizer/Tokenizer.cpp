@@ -210,7 +210,7 @@ TEST(Tokenizer, ElifToken_WithWhitespace) {
 }
 
 TEST(Tokenizer, OtherwiseToken_WithWhitespace) {
-  std::string test{"   \n\timport"};
+  std::string test{"   \n\totherwise"};
   HVE::Tokenizer tokenizer(test);
 
   ASSERT_EQ(tokenizer.GetNextToken().type, HVE::TokenType::OTHERWISE);
@@ -242,4 +242,48 @@ TEST(Tokenizer, AutotypeToken_WithWhitespace) {
   HVE::Tokenizer tokenizer(test);
 
   ASSERT_EQ(tokenizer.GetNextToken().type, HVE::TokenType::AUTOTYPE);
+}
+
+TEST(Tokenizer, StringLit_WithWhitespace) {
+  std::string test{"   \n\t\"test\""};
+  HVE::Tokenizer tokenizer(test);
+
+  auto tok = tokenizer.GetNextToken();
+
+  ASSERT_EQ(tok.type, HVE::TokenType::STRING_LITERAL);
+  ASSERT_EQ(tok.lexeme, "test");
+}
+
+TEST(Tokenizer, IntLit_WithWhitespace) {
+  std::string test{"   \n\t42069"};
+  HVE::Tokenizer tokenizer(test);
+
+  auto tok = tokenizer.GetNextToken();
+
+  ASSERT_EQ(tok.type, HVE::TokenType::INT_LITERAL);
+  ASSERT_EQ(tok.lexeme, "42069");
+}
+
+TEST(Tokenizer, FloatLit_WithWhitespace) {
+  std::string test{"   \n\t420.69"};
+  HVE::Tokenizer tokenizer(test);
+
+  auto tok = tokenizer.GetNextToken();
+
+  ASSERT_EQ(tok.type, HVE::TokenType::FLOAT_LITERAL);
+  ASSERT_EQ(tok.lexeme, "420.69");
+}
+
+TEST(Tokenizer, FloatLitMultipleDots_WithWhitespace) {
+  std::string test{"   \n\t420.6.9"};
+  HVE::Tokenizer tokenizer(test);
+
+  ASSERT_THROW({
+      try {
+          tokenizer.GetNextToken();
+        } catch (std::runtime_error& err) {
+          ASSERT_STREQ(err.what(), "Multiple dots in a float literal");
+          throw;
+        }
+      }, std::runtime_error);
 }

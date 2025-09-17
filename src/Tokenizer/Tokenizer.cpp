@@ -72,6 +72,7 @@ bool HVE::Tokenizer::SkipComments() {
       case '*':
         if (Peek() == '/' || Peek() == '\0') {
           Advance();
+          Advance();
           comment = false;
         }
         break;
@@ -157,6 +158,40 @@ HVE::Token HVE::Tokenizer::GetNextToken() {
         }
         return CreateToken(TokenType::IDENTIFIER, lexeme);
       }
+      break;
+    case TokenizerState::STRING_LIT:
+      if (ch != '"') {
+        lexeme.push_back(ch);
+        Advance();
+      } else {
+        Advance();
+        return CreateToken(TokenType::STRING_LITERAL, lexeme);
+      }
+      break;
+    case TokenizerState::INT_LIT:
+      if (ch == '.') {
+        lexeme.push_back(ch);
+        state = TokenizerState::FLOAT_LIT;
+        Advance();
+      } else if (std::isdigit(ch)) {
+        lexeme.push_back(ch);
+        Advance();
+      } else {
+        return CreateToken(TokenType::INT_LITERAL, lexeme);
+      }
+      break;
+    case TokenizerState::FLOAT_LIT:
+      if (ch == '.') {
+        throw std::runtime_error("Multiple dots in a float literal");
+      } else if (std::isdigit(ch)) {
+        lexeme.push_back(ch);
+        Advance();
+      } else {
+        return CreateToken(TokenType::FLOAT_LITERAL, lexeme);
+      }
+      break;
+    default:
+      std::abort();
     }
   }
 }
