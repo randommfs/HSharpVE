@@ -8,7 +8,7 @@ add_library(hve-parser STATIC
   Parser/Parser.cpp
 )
 target_link_libraries(hve-parser hve-tokenizer)
-target_include_directories(hve-parser PUBLIC Parser)
+target_include_directories(hve-parser PUBLIC Parser Arena)
 
 add_executable(hve-ng
   Main/Main.cpp

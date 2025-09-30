@@ -178,6 +178,7 @@ HVE::Token HVE::Tokenizer::GetNextToken() {
         lexeme.push_back(ch);
         Advance();
       } else {
+        state = TokenizerState::START;
         return CreateToken(TokenType::INT_LITERAL, lexeme);
       }
       break;
@@ -206,5 +207,11 @@ HVE::SourceLocation HVE::Tokenizer::CreateSourceLocation() {
 }
 
 std::vector<HVE::Token> HVE::Tokenizer::Tokenize() {
-  
+  std::vector<Token> tokens;
+  Token tok;
+  do {
+    tok = GetNextToken();
+    tokens.emplace_back(std::move(tok));
+  } while (tok.type != TokenType::END_OF_FILE);
+  return tokens;
 }

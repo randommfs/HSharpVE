@@ -63,6 +63,10 @@ namespace HVE {
 
     struct SourceLocation {
     public:
+      SourceLocation()
+        : line(0)
+        , offset(0)
+        , raw_offset(0) {}
       SourceLocation(std::uint32_t _line, std::uint32_t _offset, std::uint64_t _raw_offset)
         : line(_line)
         , offset(_offset)
