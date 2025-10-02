@@ -1,6 +1,8 @@
 #pragma once
 
+#include <optional>
 #include <cstdint>
+#include <variant>
 #include <vector>
 
 #include "Arena.hpp"
