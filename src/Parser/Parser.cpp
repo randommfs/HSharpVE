@@ -16,6 +16,11 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
     return m_alloc.Emplace<NodeTerm>(lit);
 
   }
+  case TokenType::FLOAT_LITERAL: {
+    auto float_tok = Consume();
+    auto* lit = m_alloc.Emplace<NodeTermFloatLit>(std::move(float_tok));
+    return m_alloc.Emplace<NodeTerm>(lit);
+  }
   case TokenType::IDENTIFIER: {
     auto int_tok = Consume();
     auto* lit = m_alloc.Emplace<NodeTermIdent>(std::move(int_tok));

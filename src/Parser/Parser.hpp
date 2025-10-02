@@ -17,6 +17,10 @@ namespace HVE::Parser {
     Token int_lit;
   };
 
+  struct NodeTermFloatLit {
+    Token float_lit;
+  };
+
   struct NodeTermIdent {
     Token ident;
   };
@@ -52,7 +56,7 @@ namespace HVE::Parser {
   };
 
   struct NodeTerm {
-    std::variant<NodeTermIntLit*, NodeTermIdent*, NodeTermParen*> term;
+    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*> term;
   };
 
   struct NodeExpr {
