@@ -6,21 +6,21 @@
 namespace HVE {
     enum class TokenType : std::uint8_t {
         /* Keywords */
-        IMPORT,
-        EXPORT,
-        PRIVATE,
-        PUBLIC,
-        STATIC,
-        DYNAMIC,
-        FUNCTION_DEF,
-        TYPENAME,
-        IF,
-        ELIF,
-        OTHERWISE,
-        CYCLE,
-        FOR,
-        NONETYPE,
-        AUTOTYPE,
+        IMPORT = 1,
+        EXPORT = 2,
+        PRIVATE = 3,
+        PUBLIC = 4,
+        STATIC = 5,
+        DYNAMIC = 6,
+        FUNCTION_DEF = 7,
+        TYPENAME = 8,
+        IF = 9,
+        ELIF = 10,
+        OTHERWISE = 11,
+        CYCLE = 12,
+        FOR = 13,
+        NONETYPE = 14,
+        AUTOTYPE = 15,
 
         /* Characters */
         SEMICOLON = ';',
@@ -43,13 +43,13 @@ namespace HVE {
         COMMA = ',',
         SINGLE_QUOTE = '\'',
         DOUBLE_QUOTE = '"',
-        ELLIPSIS,
-        END_OF_FILE,
+        ELLIPSIS = 200,
+        END_OF_FILE = 201,
 
-        IDENTIFIER,
-        INT_LITERAL,
-        FLOAT_LITERAL,
-        STRING_LITERAL,
+        IDENTIFIER = 202,
+        INT_LITERAL = 203,
+        FLOAT_LITERAL = 204,
+        STRING_LITERAL = 205,
     };
 
     enum class TokenizerState {

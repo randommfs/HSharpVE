@@ -53,6 +53,10 @@ namespace HVE::Parser {
     std::variant<NodeTermIntLit*, NodeTermIdent*, NodeTermParen*> term;
   };
 
+  struct NodeExpr {
+    std::variant<NodeTerm*, NodeBinExpr*> var;
+  };
+
   struct NodeVarAssign {
     Token name;
     NodeExpr* expr;
@@ -75,10 +79,25 @@ namespace HVE::Parser {
     TranslationUnit Parse();
   private:
     std::optional<NodeTerm*> ParseTerm();
+    std::optional<NodeExpr*> ParseExpr(int min_prec = 0);
 
     std::optional<Token> TryConsume(TokenType);
-    Token Peek(std::uint8_t offset = 1);
+    Token Peek(std::uint8_t offset = 0);
     Token Consume();
+
+    inline std::optional<int> GetPrecedence(TokenType type) {
+      switch (type) {
+      case TokenType::MINUS:
+      case TokenType::PLUS:
+        return 0;
+      case TokenType::SLASH:
+      case TokenType::STAR:
+        return 1;
+      default:
+        return {};
+      }
+    }
+
 
     std::vector<Token> m_tokens;
     std::vector<Token> m_tmp_buf;

@@ -265,6 +265,16 @@ TEST(Tokenizer, IntLit_WithWhitespace) {
   ASSERT_EQ(tok.lexeme, "42069");
 }
 
+TEST(Tokenizer, PlainIntLit) {
+  std::string test{"42069"};
+  HVE::Tokenizer tokenizer(test);
+
+  auto tok = tokenizer.GetNextToken();
+
+  ASSERT_EQ(tok.type, HVE::TokenType::INT_LITERAL);
+  ASSERT_EQ(tok.lexeme, "42069");
+}
+
 TEST(Tokenizer, FloatLit_WithWhitespace) {
   std::string test{"   \n\t420.69"};
   HVE::Tokenizer tokenizer(test);
