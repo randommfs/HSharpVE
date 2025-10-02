@@ -127,3 +127,33 @@ TEST(Parser, ParseBinExprDiv) {
   ASSERT_EQ(lit->int_lit.type, HVE::TokenType::INT_LITERAL);
   ASSERT_EQ(lit->int_lit.lexeme, "4");
 }
+
+TEST(Parser, ParseBinExprDivParen) {
+  std::string src = "(5 / 4)";
+  auto tokens = HVE::Tokenizer{src}.Tokenize();
+  auto parser = HVE::Parser::Parser(std::move(tokens));
+
+  std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
+  ASSERT_TRUE(expr.has_value());
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(expr.value()->var));
+  auto term = std::get<HVE::Parser::NodeTerm*>(expr.value()->var);
+  auto termparen = std::get<HVE::Parser::NodeTermParen*>(term->term);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeBinExpr*>(termparen->expr->var));
+  auto binexpr = std::get<HVE::Parser::NodeBinExpr*>(termparen->expr->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeBinExprDiv*>(binexpr->var));
+  auto bexprdiv = std::get<HVE::Parser::NodeBinExprDiv*>(binexpr->var);
+
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(bexprdiv->lhs->var));
+  term = std::get<HVE::Parser::NodeTerm*>(bexprdiv->lhs->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTermIntLit*>(term->term));
+  auto lit = std::get<HVE::Parser::NodeTermIntLit*>(term->term);
+  ASSERT_EQ(lit->int_lit.type, HVE::TokenType::INT_LITERAL);
+  ASSERT_EQ(lit->int_lit.lexeme, "5");
+
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(bexprdiv->rhs->var));
+  term = std::get<HVE::Parser::NodeTerm*>(bexprdiv->rhs->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTermIntLit*>(term->term));
+  lit = std::get<HVE::Parser::NodeTermIntLit*>(term->term);
+  ASSERT_EQ(lit->int_lit.type, HVE::TokenType::INT_LITERAL);
+  ASSERT_EQ(lit->int_lit.lexeme, "4");
+}
