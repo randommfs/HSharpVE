@@ -30,6 +30,7 @@ namespace HVE::Parser {
   };
 
   struct NodeExpr;
+  struct NodeFuncCall;
 
   struct NodeTermParen {
     NodeExpr* expr;
@@ -60,7 +61,7 @@ namespace HVE::Parser {
   };
 
   struct NodeTerm {
-    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*, NodeTermReflectIdent*> term;
+    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*, NodeTermReflectIdent*, NodeFuncCall*> term;
   };
 
   struct NodeExpr {
@@ -74,7 +75,7 @@ namespace HVE::Parser {
   };
 
   struct NodeStmt {
-    std::variant<NodeVarAssign*> stmt;
+    std::variant<NodeVarAssign*, NodeFuncCall*> stmt;
   };
 
   struct NodeScope {
@@ -97,6 +98,7 @@ namespace HVE::Parser {
   struct NodeFuncCall {
     Token name;
     std::vector<NodeExpr*> args;
+    std::vector<NodeExpr*> template_args;
   };
 
   struct NodeProgram {

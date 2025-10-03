@@ -21,6 +21,10 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
     return m_alloc.Emplace<NodeTerm>(lit);
   }
   case TokenType::IDENTIFIER: {
+    std::optional<NodeFuncCall*> call = ParseFuncCall();
+    if (call) {
+      return m_alloc.Emplace<NodeTerm>(call.value());
+    }
     auto int_tok = Consume();
     auto* lit = m_alloc.Emplace<NodeTermIdent>(std::move(int_tok));
     return m_alloc.Emplace<NodeTerm>(lit);
@@ -102,7 +106,10 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_pre
 }
 
 std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
-  if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COLON, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL, 3)) {
+  std::optional<NodeFuncCall*> call;
+  if (call = ParseFuncCall()) {
+    return m_alloc.Emplace<NodeStmt>(call.value());
+  } else if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COLON, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL, 3)) {
     auto ident = Consume();
     Consume();
     auto type = ParseType();
@@ -162,6 +169,37 @@ std::optional<HVE::Parser::NodeFuncCall*> HVE::Parser::Parser::ParseFuncCall() {
     }
     return call;
   } else if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::OPEN_ANGLE_BRACKET, 1)) {
+    auto func_name = Consume();
+    Consume();
+    NodeFuncCall* call = m_alloc.Emplace<NodeFuncCall>();
+    call->name = func_name;
+    while (true) {
+      std::optional<NodeExpr*> arg = ParseExpr();
+      if (!arg) {
+        break;
+      }
+      call->template_args.push_back(arg.value());
+      if (!TryConsume(TokenType::COMMA)) {
+        break;
+      }
+    }
+    if (!TryConsume(TokenType::CLOSE_ANGLE_BRACKET) || !TryConsume(TokenType::OPEN_PARENTHESIS)) {
+      throw std::runtime_error("Invalid function call");
+    }
+    while (true) {
+      std::optional<NodeExpr*> arg = ParseExpr();
+      if (!arg) {
+        break;
+      }
+      call->args.push_back(arg.value());
+      if (!TryConsume(TokenType::COMMA)) {
+        break;
+      }
+    }
+    if (!TryConsume(TokenType::CLOSE_PARENTHESIS)) {
+      throw std::runtime_error("Expected closing parenthesis in function call");
+    }
+    return call;
 
   }
   return {};

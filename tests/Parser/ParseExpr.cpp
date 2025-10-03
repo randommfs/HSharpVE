@@ -200,3 +200,32 @@ TEST(Parser, ParseBinExprDiffPrec) {
   ASSERT_EQ(lit->int_lit.type, HVE::TokenType::INT_LITERAL);
   ASSERT_EQ(lit->int_lit.lexeme, "8");
 }
+
+TEST(Parser, ParseBinExprAddWithFunc) {
+  std::string src = "5 + test()";
+  auto tokens = HVE::Tokenizer{src}.Tokenize();
+  auto parser = HVE::Parser::Parser(std::move(tokens));
+
+  std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
+  ASSERT_TRUE(expr.has_value());
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeBinExpr*>(expr.value()->var));
+  auto bexpr = std::get<HVE::Parser::NodeBinExpr*>(expr.value()->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeBinExprAdd*>(bexpr->var));
+  HVE::Parser::NodeBinExprAdd* bexpradd = std::get<HVE::Parser::NodeBinExprAdd*>(bexpr->var);
+
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(bexpradd->lhs->var));
+  auto term = std::get<HVE::Parser::NodeTerm*>(bexpradd->lhs->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTermIntLit*>(term->term));
+  auto lit = std::get<HVE::Parser::NodeTermIntLit*>(term->term);
+  ASSERT_EQ(lit->int_lit.type, HVE::TokenType::INT_LITERAL);
+  ASSERT_EQ(lit->int_lit.lexeme, "5");
+
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(bexpradd->rhs->var));
+  term = std::get<HVE::Parser::NodeTerm*>(bexpradd->rhs->var);
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeFuncCall*>(term->term));
+  auto call = std::get<HVE::Parser::NodeFuncCall*>(term->term);
+  ASSERT_EQ(call->name.lexeme, "test");
+  ASSERT_EQ(call->args.size(), 0);
+  ASSERT_EQ(call->template_args.size(), 0);
+}
+
