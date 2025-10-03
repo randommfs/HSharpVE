@@ -36,3 +36,17 @@ TEST(Parser, ParseTermIdent) {
   ASSERT_EQ(lit.ident.lexeme, "test");
 }
 
+TEST(Parser, ParseReflectedIdent) {
+  std::string src{"^^test"};
+  HVE::Tokenizer tokenizer(src);
+  std::vector<HVE::Token> tokens = tokenizer.Tokenize();
+  HVE::Parser::Parser parser(std::move(tokens));
+
+  auto term = parser.ParseTerm();
+
+  ASSERT_TRUE(term.has_value());
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTermReflectIdent*>(term.value()->term));
+  HVE::Parser::NodeTermReflectIdent& lit = *std::get<HVE::Parser::NodeTermReflectIdent*>(term.value()->term);
+  ASSERT_EQ(lit.ident.type, HVE::TokenType::IDENTIFIER);
+  ASSERT_EQ(lit.ident.lexeme, "test");
+}

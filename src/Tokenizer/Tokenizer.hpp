@@ -41,8 +41,10 @@ namespace HVE {
         BACKSLASH = '\\',
         DOT = '.',
         COMMA = ',',
+        EQUAL = '=',
         SINGLE_QUOTE = '\'',
         DOUBLE_QUOTE = '"',
+        UP_ARROW = '^',
         ELLIPSIS = 200,
         END_OF_FILE = 201,
 

@@ -25,6 +25,10 @@ namespace HVE::Parser {
     Token ident;
   };
 
+  struct NodeTermReflectIdent {
+    Token ident;
+  };
+
   struct NodeExpr;
 
   struct NodeTermParen {
@@ -56,7 +60,7 @@ namespace HVE::Parser {
   };
 
   struct NodeTerm {
-    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*> term;
+    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*, NodeTermReflectIdent*> term;
   };
 
   struct NodeExpr {
@@ -65,6 +69,7 @@ namespace HVE::Parser {
 
   struct NodeVarAssign {
     Token name;
+    std::string type;
     NodeExpr* expr;
   };
 
@@ -72,23 +77,45 @@ namespace HVE::Parser {
     std::variant<NodeVarAssign*> stmt;
   };
 
-  struct NodeProgram {
+  struct NodeScope {
     std::vector<NodeStmt*> stmts;
+  };
+
+  struct FuncArg {
+    Token name;
+    Token type;
+  };
+
+  struct NodeFuncDef {
+    Token access;
+    Token name;
+    Token ret_type;
+    std::vector<FuncArg> args;
+    NodeScope stmts;
+  };
+
+  struct NodeProgram {
+    std::vector<std::variant<NodeFuncDef*>> stmts;
   };
   
   class Parser {
   public:
     Parser(std::vector<Token>&& tokens)
       : m_tokens(tokens)
-      , m_alloc(1024 * 1024 * 16) {}
+      , m_alloc(1024 * 1024 * 64) {}
 
     TranslationUnit Parse();
   private:
+    std::optional<NodeStmt*> ParseStatement();
     std::optional<NodeTerm*> ParseTerm();
     std::optional<NodeExpr*> ParseExpr(int min_prec = 0);
+    std::optional<NodeScope*> ParseScope();
+
+    std::string ParseType();
 
     std::optional<Token> TryConsume(TokenType);
     Token Peek(std::uint8_t offset = 0);
+    bool TryPeek(TokenType type, std::uint8_t offset = 0); // Is used only to verify if there is a specific token at specific offset
     Token Consume();
 
     inline std::optional<int> GetPrecedence(TokenType type) {

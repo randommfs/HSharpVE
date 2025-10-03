@@ -6,6 +6,6 @@ export pub class Test {
     pub i32 t;
 };
 
-export pub stat fun weewee(): none {
+export pub fun weewee(): none {
 
 }

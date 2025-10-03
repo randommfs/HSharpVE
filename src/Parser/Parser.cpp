@@ -14,7 +14,6 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
     auto int_tok = Consume();
     auto* lit = m_alloc.Emplace<NodeTermIntLit>(std::move(int_tok));
     return m_alloc.Emplace<NodeTerm>(lit);
-
   }
   case TokenType::FLOAT_LITERAL: {
     auto float_tok = Consume();
@@ -24,6 +23,15 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
   case TokenType::IDENTIFIER: {
     auto int_tok = Consume();
     auto* lit = m_alloc.Emplace<NodeTermIdent>(std::move(int_tok));
+    return m_alloc.Emplace<NodeTerm>(lit);
+  }
+  case TokenType::UP_ARROW: {
+    Consume();
+    if (!TryConsume(TokenType::UP_ARROW)) {
+      throw std::runtime_error("Invalid up arrow usage");
+    }
+    auto ident = TryConsume(TokenType::IDENTIFIER);
+    auto* lit = m_alloc.Emplace<NodeTermReflectIdent>(std::move(ident.value()));
     return m_alloc.Emplace<NodeTerm>(lit);
   }
   case TokenType::OPEN_PARENTHESIS: {
@@ -93,6 +101,57 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_pre
   return expr_lhs;
 }
 
+std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
+  if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COMMA, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL)) {
+    auto ident = Consume();
+    Consume();
+    auto type = ParseType();
+    if (type.empty()) {
+      throw std::runtime_error("Failed to parse type");
+    }
+    Consume();
+    auto expr = ParseExpr();
+    if (!expr.has_value()) {
+      throw std::runtime_error("Expected expression");
+    }
+    if (!TryConsume(TokenType::SEMICOLON)) {
+      throw std::runtime_error("Expected ';' after expression");
+    }
+    auto var_assign = m_alloc.Emplace<NodeVarAssign>(ident, type, expr.value());
+    return m_alloc.Emplace<NodeStmt>(var_assign);
+  }
+}
+
+std::optional<HVE::Parser::NodeScope*> HVE::Parser::Parser::ParseScope() {
+  if (!TryConsume(TokenType::OPEN_BRACE)) {
+    throw std::runtime_error("Expected '{' before scope");
+  }
+  auto scope = m_alloc.Emplace<NodeScope>();
+  while (true) {
+    std::optional<NodeStmt*> stmt = ParseStatement();
+    if (!stmt.has_value()) {
+      break;
+    }
+    scope->stmts.emplace_back(stmt.value());
+  }
+  if (!TryConsume(TokenType::CLOSE_BRACE)) {
+    throw std::runtime_error("Expected '}' after scope");
+  }
+  return scope;
+}
+
+std::string HVE::Parser::Parser::ParseType() {
+  if (TryPeek(TokenType::OPEN_BRACKET) && TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::CLOSE_BRACKET)) {
+    Consume();
+    auto ident = Consume();
+    Consume();
+    return ident.lexeme;
+  } else if (TryPeek(TokenType::IDENTIFIER)) {
+    return Consume().lexeme;
+  }
+  return {};
+}
+
 std::optional<HVE::Token> HVE::Parser::Parser::TryConsume(TokenType type) {
   if (Peek().type == type) {
     return Consume();
@@ -103,6 +162,11 @@ std::optional<HVE::Token> HVE::Parser::Parser::TryConsume(TokenType type) {
 HVE::Token HVE::Parser::Parser::Peek(std::uint8_t offset) {
   return m_tokens[m_current_token + offset];
 }
+
+bool HVE::Parser::Parser::TryPeek(TokenType type, std::uint8_t offset) {
+  return !(m_current_token + offset >= m_tokens.size() || m_tokens[m_current_token + offset].type != type);
+}
+
 
 HVE::Token HVE::Parser::Parser::Consume() {
   return m_tokens[m_current_token++];

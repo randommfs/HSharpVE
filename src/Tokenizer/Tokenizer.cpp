@@ -179,7 +179,6 @@ HVE::Token HVE::Tokenizer::GetNextToken() {
         lexeme.push_back(ch);
         Advance();
       } else {
-        state = TokenizerState::START;
         return CreateToken(TokenType::INT_LITERAL, lexeme);
       }
       break;
