@@ -94,6 +94,11 @@ namespace HVE::Parser {
     NodeScope stmts;
   };
 
+  struct NodeFuncCall {
+    Token name;
+    std::vector<NodeExpr*> args;
+  };
+
   struct NodeProgram {
     std::vector<std::variant<NodeFuncDef*>> stmts;
   };
@@ -110,6 +115,7 @@ namespace HVE::Parser {
     std::optional<NodeTerm*> ParseTerm();
     std::optional<NodeExpr*> ParseExpr(int min_prec = 0);
     std::optional<NodeScope*> ParseScope();
+    std::optional<NodeFuncCall*> ParseFuncCall();
 
     std::string ParseType();
 

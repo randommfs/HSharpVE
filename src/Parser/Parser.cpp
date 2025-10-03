@@ -48,7 +48,7 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
     break;
   }
   default:
-    std::abort();
+    return {};
   }
 }
 
@@ -102,7 +102,7 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_pre
 }
 
 std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
-  if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COMMA, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL)) {
+  if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COLON, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL, 3)) {
     auto ident = Consume();
     Consume();
     auto type = ParseType();
@@ -120,6 +120,7 @@ std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
     auto var_assign = m_alloc.Emplace<NodeVarAssign>(ident, type, expr.value());
     return m_alloc.Emplace<NodeStmt>(var_assign);
   }
+  return {};
 }
 
 std::optional<HVE::Parser::NodeScope*> HVE::Parser::Parser::ParseScope() {
@@ -140,8 +141,34 @@ std::optional<HVE::Parser::NodeScope*> HVE::Parser::Parser::ParseScope() {
   return scope;
 }
 
+std::optional<HVE::Parser::NodeFuncCall*> HVE::Parser::Parser::ParseFuncCall() {
+  if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::OPEN_PARENTHESIS, 1)) {
+    auto func_name = Consume();
+    Consume();
+    NodeFuncCall* call = m_alloc.Emplace<NodeFuncCall>();
+    call->name = func_name;
+    while (true) {
+      std::optional<NodeExpr*> arg = ParseExpr();
+      if (!arg) {
+        break;
+      }
+      call->args.push_back(arg.value());
+      if (!TryConsume(TokenType::COMMA)) {
+        break;
+      }
+    }
+    if (!TryConsume(TokenType::CLOSE_PARENTHESIS)) {
+      throw std::runtime_error("Expected closing parenthesis in function call");
+    }
+    return call;
+  } else if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::OPEN_ANGLE_BRACKET, 1)) {
+
+  }
+  return {};
+}
+
 std::string HVE::Parser::Parser::ParseType() {
-  if (TryPeek(TokenType::OPEN_BRACKET) && TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::CLOSE_BRACKET)) {
+  if (TryPeek(TokenType::OPEN_BRACKET) && TryPeek(TokenType::IDENTIFIER, 1) && TryPeek(TokenType::CLOSE_BRACKET, 2)) {
     Consume();
     auto ident = Consume();
     Consume();
