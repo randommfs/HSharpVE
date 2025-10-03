@@ -3,6 +3,8 @@ add_executable(tests
   Tokenizer/Utils.cpp
   Parser/ParseTerm.cpp
   Parser/ParseExpr.cpp
+  Parser/ParseStmt.cpp
+  Parser/ParseFuncCall.cpp
 )
 target_link_libraries(tests hve-tokenizer hve-parser gtest::gtest)
 
