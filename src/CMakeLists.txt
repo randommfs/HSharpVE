@@ -7,6 +7,7 @@ target_compile_options(hve-tokenizer PUBLIC -O0 -ggdb3)
 
 add_library(hve-parser STATIC
   Parser/Parser.cpp
+  Parser/VariableDecl.cpp
 )
 target_link_libraries(hve-parser hve-tokenizer)
 target_include_directories(hve-parser PUBLIC Parser Arena)

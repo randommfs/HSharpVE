@@ -106,26 +106,11 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_pre
 }
 
 std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
-  std::optional<NodeFuncCall*> call;
-  if (call = ParseFuncCall()) {
+  if (auto call = ParseFuncCall()) {
     return m_alloc.Emplace<NodeStmt>(call.value());
-  } else if (TryPeek(TokenType::IDENTIFIER) && TryPeek(TokenType::COLON, 1) && TryPeek(TokenType::IDENTIFIER, 2) && TryPeek(TokenType::EQUAL, 3)) {
-    auto ident = Consume();
-    Consume();
-    auto type = ParseType();
-    if (type.empty()) {
-      throw std::runtime_error("Failed to parse type");
-    }
-    Consume();
-    auto expr = ParseExpr();
-    if (!expr.has_value()) {
-      throw std::runtime_error("Expected expression");
-    }
-    if (!TryConsume(TokenType::SEMICOLON)) {
-      throw std::runtime_error("Expected ';' after expression");
-    }
-    auto var_assign = m_alloc.Emplace<NodeVarAssign>(ident, type, expr.value());
-    return m_alloc.Emplace<NodeStmt>(var_assign);
+  }
+  if (auto decl = ParseVarDeclaration()) {
+    return m_alloc.Emplace<NodeStmt>(decl.value());
   }
   return {};
 }
@@ -205,6 +190,25 @@ std::optional<HVE::Parser::NodeFuncCall*> HVE::Parser::Parser::ParseFuncCall() {
   return {};
 }
 
+std::optional<HVE::Parser::NodeFuncDef*> HVE::Parser::Parser::ParseFuncDef() {
+  switch (Peek().type) {
+  case TokenType::PRIVATE:
+  case TokenType::PUBLIC: {
+    auto access_modifier = Consume();
+    auto name = TryConsume(TokenType::IDENTIFIER);
+    if (!name.has_value() || !TryConsume(TokenType::OPEN_PARENTHESIS)) {
+      throw std::runtime_error("Invalid function definition");
+    }
+    while (true) {
+
+    }
+    break;
+  }
+  default:
+    return {};
+  }
+}
+
 std::string HVE::Parser::Parser::ParseType() {
   if (TryPeek(TokenType::OPEN_BRACKET) && TryPeek(TokenType::IDENTIFIER, 1) && TryPeek(TokenType::CLOSE_BRACKET, 2)) {
     Consume();
@@ -216,6 +220,15 @@ std::string HVE::Parser::Parser::ParseType() {
   }
   return {};
 }
+
+std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseLValue() {
+
+}
+
+std::optional<HVE::Parser::NodeAssignment*> HVE::Parser::Parser::ParseAssignment() {
+
+}
+
 
 std::optional<HVE::Token> HVE::Parser::Parser::TryConsume(TokenType type) {
   if (Peek().type == type) {

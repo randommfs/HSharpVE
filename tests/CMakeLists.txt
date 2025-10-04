@@ -5,6 +5,7 @@ add_executable(tests
   Parser/ParseExpr.cpp
   Parser/ParseStmt.cpp
   Parser/ParseFuncCall.cpp
+  Parser/ParseVarDeclaration.cpp
 )
 target_link_libraries(tests hve-tokenizer hve-parser gtest::gtest)
 

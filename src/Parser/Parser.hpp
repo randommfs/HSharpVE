@@ -13,6 +13,11 @@ namespace HVE::Parser {
     std::vector<std::string> referenced_tus;
   };
 
+  enum class ValueType {
+    LVALUE,
+    RVALUE
+  };
+
   struct NodeTermIntLit {
     Token int_lit;
   };
@@ -66,16 +71,23 @@ namespace HVE::Parser {
 
   struct NodeExpr {
     std::variant<NodeTerm*, NodeBinExpr*> var;
+    ValueType type;
   };
 
-  struct NodeVarAssign {
-    Token name;
-    std::string type;
+  struct NodeAssignment {
+    NodeExpr* lhs;
+    NodeExpr* rhs;
+    Token op;
+  };
+
+  struct NodeVarDeclaration {
+    Token ident;
+    Token type;
     NodeExpr* expr;
   };
 
   struct NodeStmt {
-    std::variant<NodeVarAssign*, NodeFuncCall*> stmt;
+    std::variant<NodeAssignment*, NodeVarDeclaration*, NodeFuncCall*> stmt;
   };
 
   struct NodeScope {
@@ -113,11 +125,18 @@ namespace HVE::Parser {
 
     TranslationUnit Parse();
   private:
+    std::optional<NodeExpr*> ParseLValue();
     std::optional<NodeStmt*> ParseStatement();
     std::optional<NodeTerm*> ParseTerm();
     std::optional<NodeExpr*> ParseExpr(int min_prec = 0);
     std::optional<NodeScope*> ParseScope();
     std::optional<NodeFuncCall*> ParseFuncCall();
+    std::optional<NodeFuncDef*> ParseFuncDef();
+
+    std::optional<NodeAssignment*> ParseAssignment();
+
+    /* Variable init */
+    std::optional<NodeVarDeclaration*> ParseVarDeclaration();
 
     std::string ParseType();
 
