@@ -1,7 +1,7 @@
 #include "Parser.hpp"
 
 std::optional<HVE::Parser::NodeVarDeclaration*> HVE::Parser::Parser::ParseVarDeclaration() {
-  if (!(TryPeek(TokenType::IDENTIFIER) || TryPeek(TokenType::COLON, 1) || TryPeek(TokenType::IDENTIFIER, 2))) {
+  if (!TryPeek(TokenType::IDENTIFIER) || !TryPeek(TokenType::COLON, 1) || !TryPeek(TokenType::IDENTIFIER, 2)) {
     return std::nullopt;
   }
 

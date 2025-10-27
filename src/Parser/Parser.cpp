@@ -21,9 +21,11 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
     return m_alloc.Emplace<NodeTerm>(lit);
   }
   case TokenType::IDENTIFIER: {
-    std::optional<NodeFuncCall*> call = ParseFuncCall();
-    if (call) {
+    if (auto call = ParseFuncCall()) {
       return m_alloc.Emplace<NodeTerm>(call.value());
+    }
+    if (auto op = ParseSubscriptOp()) {
+      return m_alloc.Emplace<NodeTerm>(op.value());
     }
     auto int_tok = Consume();
     auto* lit = m_alloc.Emplace<NodeTermIdent>(std::move(int_tok));
@@ -57,11 +59,17 @@ std::optional<HVE::Parser::NodeTerm*> HVE::Parser::Parser::ParseTerm() {
 }
 
 std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_prec) {
-  std::optional<NodeTerm*> term_lhs = ParseTerm();
-  if (!term_lhs.has_value()) {
+  auto complex_term = ParseComplexTerm();
+  if (!complex_term.has_value()) {
     return {};
   }
-  auto expr_lhs = m_alloc.Emplace<NodeExpr>(std::move(term_lhs.value()));
+  std::optional<NodeTerm*> term_lhs;
+  if (complex_term.value()->terms.size() == 1) {
+    term_lhs = complex_term.value()->terms[0];
+  } else {
+    term_lhs = m_alloc.Emplace<NodeTerm>(complex_term.value());
+  }
+  auto expr_lhs = m_alloc.Emplace<NodeExpr>(term_lhs.value());
   while (true) {
     std::optional<Token> tok = Peek();
     std::optional<int> prec;
@@ -106,13 +114,22 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseExpr(int min_pre
 }
 
 std::optional<HVE::Parser::NodeStmt*> HVE::Parser::Parser::ParseStatement() {
-  if (auto call = ParseFuncCall()) {
-    return m_alloc.Emplace<NodeStmt>(call.value());
-  }
+  std::optional<NodeExpr*> expr;
+  auto stmt = m_alloc.Alloc<NodeStmt>();
   if (auto decl = ParseVarDeclaration()) {
-    return m_alloc.Emplace<NodeStmt>(decl.value());
+    stmt->stmt = decl.value();
+  } else if ((expr = ParseExpr()).has_value()) {
+    if (TryPeek(TokenType::EQUAL)) {
+      auto assign = ParseAssignment(expr.value());
+      stmt->stmt = assign.value();
+    } else {
+      stmt->stmt = expr.value();
+    }
   }
-  return {};
+  if (!TryConsume(TokenType::SEMICOLON)) {
+    throw std::runtime_error("Expected ';' in a statement");
+  }
+  return stmt;
 }
 
 std::optional<HVE::Parser::NodeScope*> HVE::Parser::Parser::ParseScope() {
@@ -225,8 +242,75 @@ std::optional<HVE::Parser::NodeExpr*> HVE::Parser::Parser::ParseLValue() {
 
 }
 
-std::optional<HVE::Parser::NodeAssignment*> HVE::Parser::Parser::ParseAssignment() {
+std::optional<HVE::Parser::NodeAssignment*> HVE::Parser::Parser::ParseAssignment(NodeExpr* lhs) {
+  std::optional<HVE::Parser::NodeExpr*> expr;
+  if (lhs == nullptr) {
+    expr = ParseExpr();
+    if (!expr) {
+      return {};
+    }
+  } else {
+    expr = lhs;
+  }
+  if (!TryPeek(TokenType::EQUAL)) {
+    throw std::runtime_error("Expected '=' in assignment");
+  }
+  auto assignment = m_alloc.Emplace<NodeAssignment>();
+  assignment->lhs = expr.value();
 
+  assignment->op = Consume();
+  expr = ParseExpr();
+  if (!expr) {
+    throw std::runtime_error("Expected expression");
+  }
+  assignment->rhs = expr.value();
+  return assignment;
+}
+
+std::optional<HVE::Parser::NodeSubscriptOp*> HVE::Parser::Parser::ParseSubscriptOp() {
+  if (!TryPeek(TokenType::IDENTIFIER) || !TryPeek(TokenType::OPEN_BRACKET, 1)) {
+    return {};
+  }
+  auto ident = Consume();
+  Consume();
+  auto expr = ParseExpr();
+  if (!expr) {
+    throw std::runtime_error("Expected expression");
+  }
+  auto subscript_op = m_alloc.Emplace<NodeSubscriptOp>();
+  subscript_op->ident = ident;
+  subscript_op->subscript_args.push_back(expr.value());
+  while (TryConsume(TokenType::COMMA)) {
+    auto sexpr = ParseExpr();
+    subscript_op->subscript_args.push_back(sexpr.value());
+  }
+  if (!TryConsume(TokenType::CLOSE_BRACKET)) {
+    throw std::runtime_error("Expected closing bracket");
+  }
+  return subscript_op;
+}
+
+std::optional<HVE::Parser::NodeComplexTerm *> HVE::Parser::Parser::ParseComplexTerm() {
+  auto term = ParseTerm();
+  if (!term.has_value()) {
+    return {};
+  }
+  if (TryConsume(TokenType::DOT)) {
+    auto complex_term = m_alloc.Emplace<NodeComplexTerm>();
+    complex_term->terms.push_back(term.value());
+    auto sub_cmpx_term = ParseComplexTerm();
+    if (sub_cmpx_term) {
+      if (sub_cmpx_term.value()->terms.size() == 1) {
+        complex_term->terms.push_back(sub_cmpx_term.value()->terms[0]);
+      } else {
+        complex_term->terms.insert(complex_term->terms.end(), sub_cmpx_term.value()->terms.begin(), sub_cmpx_term.value()->terms.end());
+      }
+    }
+    return complex_term;
+  }
+  auto complex_term = m_alloc.Emplace<NodeComplexTerm>();
+  complex_term->terms.push_back(term.value());
+  return complex_term;
 }
 
 

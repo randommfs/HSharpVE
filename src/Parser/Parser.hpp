@@ -36,6 +36,8 @@ namespace HVE::Parser {
 
   struct NodeExpr;
   struct NodeFuncCall;
+  struct NodeSubscriptOp;
+  struct NodeComplexTerm;
 
   struct NodeTermParen {
     NodeExpr* expr;
@@ -66,12 +68,18 @@ namespace HVE::Parser {
   };
 
   struct NodeTerm {
-    std::variant<NodeTermIntLit*, NodeTermFloatLit*, NodeTermIdent*, NodeTermParen*, NodeTermReflectIdent*, NodeFuncCall*> term;
+    std::variant<NodeTermIntLit*,
+      NodeTermFloatLit*,
+      NodeTermIdent*,
+      NodeTermParen*,
+      NodeTermReflectIdent*,
+      NodeFuncCall*,
+      NodeSubscriptOp*,
+      NodeComplexTerm*> term;
   };
 
   struct NodeExpr {
     std::variant<NodeTerm*, NodeBinExpr*> var;
-    ValueType type;
   };
 
   struct NodeAssignment {
@@ -87,7 +95,7 @@ namespace HVE::Parser {
   };
 
   struct NodeStmt {
-    std::variant<NodeAssignment*, NodeVarDeclaration*, NodeFuncCall*> stmt;
+    std::variant<NodeAssignment*, NodeVarDeclaration*, NodeExpr*> stmt;
   };
 
   struct NodeScope {
@@ -113,6 +121,15 @@ namespace HVE::Parser {
     std::vector<NodeExpr*> template_args;
   };
 
+  struct NodeSubscriptOp {
+    Token ident;
+    std::vector<NodeExpr*> subscript_args;
+  };
+
+  struct NodeComplexTerm {
+    std::vector<NodeTerm*> terms;
+  };
+
   struct NodeProgram {
     std::vector<std::variant<NodeFuncDef*>> stmts;
   };
@@ -126,14 +143,17 @@ namespace HVE::Parser {
     TranslationUnit Parse();
   private:
     std::optional<NodeExpr*> ParseLValue();
+    std::optional<NodeExpr*> ParseRValue();
     std::optional<NodeStmt*> ParseStatement();
     std::optional<NodeTerm*> ParseTerm();
+    std::optional<NodeComplexTerm*> ParseComplexTerm();
     std::optional<NodeExpr*> ParseExpr(int min_prec = 0);
     std::optional<NodeScope*> ParseScope();
     std::optional<NodeFuncCall*> ParseFuncCall();
     std::optional<NodeFuncDef*> ParseFuncDef();
+    std::optional<NodeSubscriptOp*> ParseSubscriptOp();
 
-    std::optional<NodeAssignment*> ParseAssignment();
+    std::optional<NodeAssignment*> ParseAssignment(NodeExpr* lhs = nullptr);
 
     /* Variable init */
     std::optional<NodeVarDeclaration*> ParseVarDeclaration();
