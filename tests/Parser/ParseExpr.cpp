@@ -3,12 +3,12 @@
 #include <variant>
 
 #define private public
-#include "Parser.hpp"
+#include "../../src/Parser/AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseIntLit) {
   std::string src = "5";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -23,7 +23,7 @@ TEST(Parser, ParseIntLit) {
 TEST(Parser, ParseBinExprAdd) {
   std::string src = "5 + 4";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -50,7 +50,7 @@ TEST(Parser, ParseBinExprAdd) {
 TEST(Parser, ParseBinExprSub) {
   std::string src = "5 - 4";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -77,7 +77,7 @@ TEST(Parser, ParseBinExprSub) {
 TEST(Parser, ParseBinExprMul) {
   std::string src = "5 * 4";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -104,7 +104,7 @@ TEST(Parser, ParseBinExprMul) {
 TEST(Parser, ParseBinExprDiv) {
   std::string src = "5 / 4";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -131,7 +131,7 @@ TEST(Parser, ParseBinExprDiv) {
 TEST(Parser, ParseBinExprDivParen) {
   std::string src = "(5 / 4)";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -161,7 +161,7 @@ TEST(Parser, ParseBinExprDivParen) {
 TEST(Parser, ParseBinExprDiffPrec) {
   std::string src = "(5 - 4) * 8";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());
@@ -204,7 +204,7 @@ TEST(Parser, ParseBinExprDiffPrec) {
 TEST(Parser, ParseBinExprAddWithFunc) {
   std::string src = "5 + test()";
   auto tokens = HVE::Tokenizer{src}.Tokenize();
-  auto parser = HVE::Parser::Parser(std::move(tokens));
+  auto parser = HVE::Parser::ASTBuilder(std::move(tokens));
 
   std::optional<HVE::Parser::NodeExpr*> expr = parser.ParseExpr();
   ASSERT_TRUE(expr.has_value());

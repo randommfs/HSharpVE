@@ -88,31 +88,30 @@ namespace HVE::Parser {
     Token op;
   };
 
-  struct NodeVarDeclaration {
+  struct VarDecl {
     Token ident;
     Token type;
-    NodeExpr* expr;
+  };
+
+  struct NodeVarDeclaration {
+    VarDecl decl;
+    NodeExpr* expr = nullptr;
   };
 
   struct NodeStmt {
-    std::variant<NodeAssignment*, NodeVarDeclaration*, NodeExpr*> stmt;
+    std::variant<NodeAssignment*, NodeVarDeclaration*, NodeExpr*, std::monostate> stmt;
   };
 
   struct NodeScope {
     std::vector<NodeStmt*> stmts;
   };
 
-  struct FuncArg {
-    Token name;
-    Token type;
-  };
-
   struct NodeFuncDef {
     Token access;
     Token name;
     Token ret_type;
-    std::vector<FuncArg> args;
-    NodeScope stmts;
+    std::vector<VarDecl> args;
+    NodeScope* stmts;
   };
 
   struct NodeFuncCall {
@@ -130,20 +129,26 @@ namespace HVE::Parser {
     std::vector<NodeTerm*> terms;
   };
 
+  struct NodeImport {
+    std::vector<std::string> import_target;
+  };
+
+  struct NodeTopLevelStmt {
+    std::variant<NodeFuncDef*, NodeImport*> stmt;
+  };
+
   struct NodeProgram {
-    std::vector<std::variant<NodeFuncDef*>> stmts;
+    std::vector<NodeTopLevelStmt*> stmts;
   };
   
-  class Parser {
+  class ASTBuilder {
   public:
-    Parser(std::vector<Token>&& tokens)
+    ASTBuilder(std::vector<Token>&& tokens)
       : m_tokens(tokens)
       , m_alloc(1024 * 1024 * 64) {}
 
-    TranslationUnit Parse();
+    NodeProgram* BuildAST();
   private:
-    std::optional<NodeExpr*> ParseLValue();
-    std::optional<NodeExpr*> ParseRValue();
     std::optional<NodeStmt*> ParseStatement();
     std::optional<NodeTerm*> ParseTerm();
     std::optional<NodeComplexTerm*> ParseComplexTerm();
@@ -152,6 +157,9 @@ namespace HVE::Parser {
     std::optional<NodeFuncCall*> ParseFuncCall();
     std::optional<NodeFuncDef*> ParseFuncDef();
     std::optional<NodeSubscriptOp*> ParseSubscriptOp();
+
+    std::optional<NodeImport*> ParseImport();
+    std::optional<NodeTopLevelStmt*> ParseTopLevelStmt();
 
     std::optional<NodeAssignment*> ParseAssignment(NodeExpr* lhs = nullptr);
 

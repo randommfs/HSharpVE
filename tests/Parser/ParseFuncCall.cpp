@@ -3,13 +3,13 @@
 #include <variant>
 
 #define private public
-#include "Parser.hpp"
+#include "../../src/Parser/AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseFuncCallNoArgs) {
   std::string src{"test()"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());
@@ -22,7 +22,7 @@ TEST(Parser, ParseFuncCallSingleArg) {
   std::string src{"test(5)"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());
@@ -42,7 +42,7 @@ TEST(Parser, ParseFuncCallMultipleArgs) {
   std::string src{"test(5, 4, 6)"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());
@@ -76,7 +76,7 @@ TEST(Parser, ParseTemplateFuncCallNoArgs) {
   std::string src{"test<>()"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());
@@ -90,7 +90,7 @@ TEST(Parser, ParseTemplateFuncCallSingleArg) {
   std::string src{"test<8>(5)"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());
@@ -119,7 +119,7 @@ TEST(Parser, ParseTemplateFuncCallMultipleArgs) {
   std::string src{"test<2, 8>(5, 4, 6)"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseFuncCall();
 
   ASSERT_TRUE(result.has_value());

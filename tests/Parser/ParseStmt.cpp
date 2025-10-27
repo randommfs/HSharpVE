@@ -2,13 +2,13 @@
 #include <variant>
 
 #define private public
-#include "Parser.hpp"
+#include "../../src/Parser/AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseExpr) {
   std::string src{"test();"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseStatement();
 
   ASSERT_TRUE(result.has_value());
@@ -27,7 +27,7 @@ TEST(Parser, ParseAssignment) {
   std::string src{"5 = 7;"};
   HVE::Tokenizer tokenizer(src);
   auto tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   auto result = parser.ParseStatement();
 
   ASSERT_TRUE(result.has_value());
@@ -45,4 +45,36 @@ TEST(Parser, ParseAssignment) {
   ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTermIntLit*>(lhs->term));
   auto rhs_term = std::get<HVE::Parser::NodeTermIntLit*>(rhs->term);
   ASSERT_EQ(rhs_term->int_lit.lexeme, "7");
+}
+
+TEST(Parser, ParseImport) {
+  std::string src{"import stl.foo;"};
+  HVE::Tokenizer tokenizer(src);
+  auto tokens = tokenizer.Tokenize();
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
+  auto result = parser.ParseImport();
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_EQ(result.value()->import_target.size(), 2);
+  ASSERT_EQ(result.value()->import_target[0], "stl");
+  ASSERT_EQ(result.value()->import_target[1], "foo");
+}
+
+TEST(Parser, ParseStmtAssignmentInit) {
+  std::string src{"foo: i32 = 5;"};
+  HVE::Tokenizer tokenizer(src);
+  std::vector<HVE::Token> tokens = tokenizer.Tokenize();
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
+
+  auto decl = parser.ParseStatement();
+
+  ASSERT_TRUE(decl.has_value());
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeVarDeclaration*>(decl.value()->stmt));
+  auto var = std::get<HVE::Parser::NodeVarDeclaration*>(decl.value()->stmt);
+  ASSERT_EQ(var->decl.ident.type, HVE::TokenType::IDENTIFIER);
+  ASSERT_EQ(var->decl.ident.lexeme, "foo");
+  ASSERT_EQ(var->decl.type.type, HVE::TokenType::IDENTIFIER);
+  ASSERT_EQ(var->decl.type.lexeme, "i32");
+
+  ASSERT_TRUE(std::holds_alternative<HVE::Parser::NodeTerm*>(var->expr->var));
 }

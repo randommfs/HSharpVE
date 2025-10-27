@@ -4,13 +4,13 @@
 #include <variant>
 
 #define private public
-#include "Parser.hpp"
+#include "../../src/Parser/AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseTermIntLit) {
   std::string src{"5"};
   HVE::Tokenizer tokenizer(src);
   std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   
   auto term = parser.ParseTerm();
 
@@ -25,7 +25,7 @@ TEST(Parser, ParseTermIdent) {
   std::string src{"test"};
   HVE::Tokenizer tokenizer(src);
   std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
   
   auto term = parser.ParseTerm();
 
@@ -40,7 +40,7 @@ TEST(Parser, ParseReflectedIdent) {
   std::string src{"^^test"};
   HVE::Tokenizer tokenizer(src);
   std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
 
   auto term = parser.ParseTerm();
 
@@ -55,7 +55,7 @@ TEST(Parser, ParseSubscriptOp) {
   std::string src{"test[5]"};
   HVE::Tokenizer tokenizer(src);
   std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-  HVE::Parser::Parser parser(std::move(tokens));
+  HVE::Parser::ASTBuilder parser(std::move(tokens));
 
   auto term = parser.ParseTerm();
 

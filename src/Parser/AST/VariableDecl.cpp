@@ -1,6 +1,6 @@
-#include "Parser.hpp"
+#include "ASTBuilder.hpp"
 
-std::optional<HVE::Parser::NodeVarDeclaration*> HVE::Parser::Parser::ParseVarDeclaration() {
+std::optional<HVE::Parser::NodeVarDeclaration*> HVE::Parser::ASTBuilder::ParseVarDeclaration() {
   if (!TryPeek(TokenType::IDENTIFIER) || !TryPeek(TokenType::COLON, 1) || !TryPeek(TokenType::IDENTIFIER, 2)) {
     return std::nullopt;
   }
@@ -8,7 +8,9 @@ std::optional<HVE::Parser::NodeVarDeclaration*> HVE::Parser::Parser::ParseVarDec
   auto name = Consume();
   Consume();
   auto type = Consume();
-  auto var = m_alloc.Emplace<NodeVarDeclaration>(name, type, nullptr);
+  auto var = m_alloc.Emplace<NodeVarDeclaration>(name, type);
+
+  return var;
 
   switch (Peek().type) {
   case TokenType::EQUAL: {

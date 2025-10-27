@@ -4,13 +4,13 @@
 #include <variant>
 
 #define private public
-#include "Parser.hpp"
+#include "../../src/Parser/AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseComplexTermIdentIdent) {
     std::string src{"test.foo"};
     HVE::Tokenizer tokenizer(src);
     std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-    HVE::Parser::Parser parser(std::move(tokens));
+    HVE::Parser::ASTBuilder parser(std::move(tokens));
 
     auto term = parser.ParseComplexTerm();
 
@@ -32,7 +32,7 @@ TEST(Parser, ParseComplexTermIdentFunc) {
     std::string src{"test.foo()"};
     HVE::Tokenizer tokenizer(src);
     std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-    HVE::Parser::Parser parser(std::move(tokens));
+    HVE::Parser::ASTBuilder parser(std::move(tokens));
 
     auto term = parser.ParseComplexTerm();
 
@@ -56,7 +56,7 @@ TEST(Parser, ParseComplexTermFuncFunc) {
     std::string src{"test().foo()"};
     HVE::Tokenizer tokenizer(src);
     std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-    HVE::Parser::Parser parser(std::move(tokens));
+    HVE::Parser::ASTBuilder parser(std::move(tokens));
 
     auto term = parser.ParseComplexTerm();
 
@@ -82,7 +82,7 @@ TEST(Parser, ParseComplexTermExprFunc) {
     std::string src{"(test.bar(5, 4).baz()).foo()"};
     HVE::Tokenizer tokenizer(src);
     std::vector<HVE::Token> tokens = tokenizer.Tokenize();
-    HVE::Parser::Parser parser(std::move(tokens));
+    HVE::Parser::ASTBuilder parser(std::move(tokens));
 
     auto term = parser.ParseComplexTerm();
 
