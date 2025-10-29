@@ -6,6 +6,7 @@ add_executable(tests
   Parser/ParseStmt.cpp
   Parser/ParseFuncCall.cpp
   Parser/ParseVarDeclaration.cpp
+  Parser/ParseClassDef.cpp
     Parser/ParseComplexTerm.cpp
     Parser/ParseTopLevelStatement.cpp
     Analyzer/TUBuilder.cpp

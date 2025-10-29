@@ -21,6 +21,7 @@ namespace HVE {
         FOR = 13,
         NONETYPE = 14,
         AUTOTYPE = 15,
+        CLASS = 16,
 
         /* Characters */
         SEMICOLON = ';',

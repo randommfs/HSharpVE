@@ -91,6 +91,7 @@ namespace HVE::Parser {
   struct VarDecl {
     Token ident;
     Token type;
+    std::optional<Token> access_modifier;
   };
 
   struct NodeVarDeclaration {
@@ -113,6 +114,11 @@ namespace HVE::Parser {
     std::vector<VarDecl> args;
     NodeScope* stmts;
   };
+  struct NodeClassDef {
+    Token name;
+    std::vector<VarDecl> member_vars;
+    std::vector<NodeFuncDef> member_methods;
+  }
 
   struct NodeFuncCall {
     Token name;
@@ -134,7 +140,7 @@ namespace HVE::Parser {
   };
 
   struct NodeTopLevelStmt {
-    std::variant<NodeFuncDef*, NodeImport*> stmt;
+    std::variant<NodeFuncDef*, NodeImport*, NodeClassDef*> stmt;
   };
 
   struct NodeProgram {
@@ -156,6 +162,7 @@ namespace HVE::Parser {
     std::optional<NodeScope*> ParseScope();
     std::optional<NodeFuncCall*> ParseFuncCall();
     std::optional<NodeFuncDef*> ParseFuncDef();
+    std::optional<NodeClassDef*> ParseClassDef();
     std::optional<NodeSubscriptOp*> ParseSubscriptOp();
 
     std::optional<NodeImport*> ParseImport();
@@ -164,7 +171,7 @@ namespace HVE::Parser {
     std::optional<NodeAssignment*> ParseAssignment(NodeExpr* lhs = nullptr);
 
     /* Variable init */
-    std::optional<NodeVarDeclaration*> ParseVarDeclaration();
+    std::optional<NodeVarDeclaration*> ParseVarDeclaration(bool with_access_modifier = false);
 
     std::string ParseType();
 

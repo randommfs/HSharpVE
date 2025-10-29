@@ -20,7 +20,8 @@ static constexpr auto ident_assoc = mapbox::eternal::map<mapbox::eternal::string
     {"cycle", HVE::TokenType::CYCLE},
     {"for", HVE::TokenType::FOR},
     {"none", HVE::TokenType::NONETYPE},
-    {"easy", HVE::TokenType::AUTOTYPE}
+    {"easy", HVE::TokenType::AUTOTYPE},
+    {"class", HVE::TokenType::CLASS}
 });
 
 char HVE::Tokenizer::Peek(std::uint8_t offset) {

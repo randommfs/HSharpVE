@@ -277,6 +277,26 @@ std::optional<HVE::Parser::NodeFuncDef*> HVE::Parser::ASTBuilder::ParseFuncDef()
   return {};
 }
 
+std::optional<NodeClassDef*> HVE::Parser::Parser::ParseClassDef() {
+  if (!TryPeek(HVE::TokenType::CLASS) || !TryPeek(HVE::TokenType::IDENTIFIER)) {
+    return {};
+  }
+  Consume();
+  auto class_name = Consume();
+  if (!TryConsume(HVE::TokenType::OPEN_BRACE)) {
+    throw std::runtime_error("Failed to parse the scope");
+  }
+  while (true) {
+    if (auto func = ParseFuncDef()) {
+      class_name->member_methods.push_back(func.value());
+    } else if (auto decl = ParseVarDeclaration(true)) {
+      class_name->member_vars.push_back(decl.value());
+    } else {
+      break;
+    }
+  }
+}
+
 std::string HVE::Parser::ASTBuilder::ParseType() {
   if (TryPeek(TokenType::OPEN_BRACKET) && TryPeek(TokenType::IDENTIFIER, 1) && TryPeek(TokenType::CLOSE_BRACKET, 2)) {
     Consume();
