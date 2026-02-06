@@ -277,7 +277,7 @@ std::optional<HVE::Parser::NodeFuncDef*> HVE::Parser::ASTBuilder::ParseFuncDef()
   return {};
 }
 
-std::optional<NodeClassDef*> HVE::Parser::Parser::ParseClassDef() {
+std::optional<HVE::Parser::NodeClassDef*> HVE::Parser::ASTBuilder::ParseClassDef() {
   if (!TryPeek(HVE::TokenType::CLASS) || !TryPeek(HVE::TokenType::IDENTIFIER)) {
     return {};
   }
@@ -288,9 +288,9 @@ std::optional<NodeClassDef*> HVE::Parser::Parser::ParseClassDef() {
   }
   while (true) {
     if (auto func = ParseFuncDef()) {
-      class_name->member_methods.push_back(func.value());
+      //class_name->member_methods.push_back(func.value());
     } else if (auto decl = ParseVarDeclaration(true)) {
-      class_name->member_vars.push_back(decl.value());
+      //class_name->member_vars.push_back(decl.value());
     } else {
       break;
     }

@@ -4,7 +4,7 @@
 #include <variant>
 
 #define private public
-#include "../../src/Parser/AST/ASTBuilder.hpp"
+#include "AST/ASTBuilder.hpp"
 
 TEST(Parser, ParseComplexTermIdentIdent) {
     std::string src{"test.foo"};

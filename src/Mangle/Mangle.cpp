@@ -1,5 +1,7 @@
 #include "Mangle.hpp"
 
+#include <cstring>
+
 std::string HVE::Mangle::Mangle(HVE::Parser::NodeFuncDef* func_def) {
     std::string res;
     res += return_type_label;

@@ -3,7 +3,8 @@
 #include <variant>
 
 #define private public
-#include "Parser/AST/ASTBuilder.hpp"
+#include "AST/ASTBuilder.hpp"
+
 
 TEST(Parser, ParseClassDef) {
   std::string src{R"(class Foo {
@@ -17,6 +18,6 @@ TEST(Parser, ParseClassDef) {
   auto decl = parser.ParseClassDef();
 
   ASSERT_TRUE(decl.has_value());
-  ASSERT_EQ(decl.value().member_vars.size(), 1);
-  ASSERT_EQ(decl.value().member_methods.size(), 1);
+  ASSERT_EQ(decl.value()->member_vars.size(), 1);
+  ASSERT_EQ(decl.value()->member_methods.size(), 1);
 }

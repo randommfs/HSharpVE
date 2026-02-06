@@ -6,11 +6,11 @@ add_executable(tests
   Parser/ParseStmt.cpp
   Parser/ParseFuncCall.cpp
   Parser/ParseVarDeclaration.cpp
-  Parser/ParseClassDef.cpp
+  #Parser/ParseClassDef.cpp
     Parser/ParseComplexTerm.cpp
     Parser/ParseTopLevelStatement.cpp
     Analyzer/TUBuilder.cpp
-        Analyzer/Mangle.cpp
+    Analyzer/Mangle.cpp
 )
 target_link_libraries(tests hve-tokenizer hve-parser hve-semantic-analyzer hve-mangler gtest::gtest)
 

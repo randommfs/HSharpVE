@@ -144,7 +144,6 @@ HVE::Token HVE::Tokenizer::GetNextToken() {
         Advance();
         continue;
       case '\0':
-        Advance();
         return CreateToken(TokenType::END_OF_FILE, {});
       default:
         Advance();

@@ -118,7 +118,7 @@ namespace HVE::Parser {
     Token name;
     std::vector<VarDecl> member_vars;
     std::vector<NodeFuncDef> member_methods;
-  }
+  };
 
   struct NodeFuncCall {
     Token name;

@@ -2,6 +2,8 @@
 
 #include "../../Mangle/Mangle.hpp"
 
+#include <iostream>
+
 HVE::SemanticAnalyzer::Analyzer::Analyzer(Parser::NodeProgram* prog)
     : m_prog(prog) { }
 
@@ -9,7 +11,8 @@ HVE::SemanticAnalyzer::TranslationUnit HVE::SemanticAnalyzer::Analyzer::BuildTU(
     TranslationUnit tu;
 
     for (auto stmt : m_prog->stmts) {
-        std::visit([&tu]<typename T>(T&& arg) -> void {
+        std::visit([&tu]<typename T_>(T_&& arg) -> void {
+          using T = std::remove_cvref_t<T_>;
             if constexpr (std::is_same_v<T, Parser::NodeImport*>) {
                 tu.imports.push_back(arg);
             } else if constexpr (std::is_same_v<T, Parser::NodeFuncDef*>) {

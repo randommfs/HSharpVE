@@ -2,7 +2,7 @@
 
 std::optional<HVE::Parser::NodeVarDeclaration*> HVE::Parser::ASTBuilder::ParseVarDeclaration(bool with_access_modifier) {
   if (with_access_modifier) {
-    if ((!TryPeek(TokenType::PUBLIC) && !TryPeek(TokenType::PRIVATE)) !TryPeek(TokenType::IDENTIFIER, 1) || !TryPeek(TokenType::COLON, 2) || !TryPeek(TokenType::IDENTIFIER, 3)) {
+    if ((!TryPeek(TokenType::PUBLIC) && !TryPeek(TokenType::PRIVATE)) && !TryPeek(TokenType::IDENTIFIER, 1) || !TryPeek(TokenType::COLON, 2) || !TryPeek(TokenType::IDENTIFIER, 3)) {
       return std::nullopt;
     }
   } else {
